@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:mog_flutter/others/resendController.dart';
 import 'package:mog_flutter/pages/login.dart';
 import 'package:mog_flutter/widgets/TextField.dart';
 import 'package:mog_flutter/others/supabaseController.dart';
+import 'package:otp_text_field/otp_field.dart';
+import 'package:otp_text_field/style.dart';
 
 class SingUpPage extends StatefulWidget {
   const SingUpPage({super.key});
@@ -18,9 +21,15 @@ class _SingUpPageState extends State<SingUpPage> {
   final passwordController = TextEditingController();
   final comfirmPasswordController = TextEditingController();
 
+  final verificationController = TextEditingController();
+
   String error = "";
 
   final supabaseController supa = supabaseController();
+  final resendController resend = resendController();
+
+  final String apiUrl = 'https://api.resend.com/emails';
+  final String apiKey = "re_HCsSoSaD_Gh5rBokiYX37qmB47XReHzCT";
 
   void createAccount() {
     if (emailController.text.isNotEmpty &&
@@ -32,6 +41,24 @@ class _SingUpPageState extends State<SingUpPage> {
         error = supa.showError();
         supa.error = "";
       });
+    }
+    sendEmail();
+  }
+
+  void codeVerification(pin){
+    if(pin == resend.getVerifyCode()){
+      print("correct");
+    }
+    else{
+      print("incorrect");
+    }
+  }
+
+  void sendEmail() {
+    if (emailController.text.isNotEmpty &&
+        passwordController.text.isNotEmpty &&
+        userNameController.text.isNotEmpty) {
+      resend.postData(userNameController.text, emailController.text);
     }
   }
 
@@ -100,7 +127,36 @@ class _SingUpPageState extends State<SingUpPage> {
         children: [
           ElevatedButton(
               onPressed: () {
-                createAccount();
+                //createAccount();
+                showDialog(
+                  //if set to true allow to close popup by tapping out of the popup
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (BuildContext context) => AlertDialog(
+                    title: Text("Insert Verification code"),
+                    content: OTPTextField(
+                      length: 5,
+                      width: MediaQuery.of(context).size.width,
+                      fieldWidth: 50,
+                      style: TextStyle(fontSize: 17),
+                      textFieldAlignment: MainAxisAlignment.spaceAround,
+                      fieldStyle: FieldStyle.underline,
+                      onCompleted: (pin) {
+                        codeVerification(pin);
+                      },
+                    ),
+                    actions: [
+                     
+                      ElevatedButton(
+                        child: Text("Cancel"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      )
+                    ],
+                    elevation: 24,
+                  ),
+                );
               },
               child: Text("Create account")),
           SizedBox(
