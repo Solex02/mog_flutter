@@ -28,15 +28,15 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void loginApp() {
+  Future<void> loginApp() async {
     if (emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
-      if (supa.login(emailController.text, passwordController.text)) {
+      if (await supa.userCheck(emailController.text, passwordController.text) == true) {
         setState(() {
           error = "";
         });
       } else {
         setState(() {
-          error = "password or email incorrect";
+          error = "email or password incorrect";
         });
       }
     }

@@ -1,47 +1,50 @@
+import 'package:crypt/crypt.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 class supabaseController {
-  var encontrado = false;
+  final supabase = Supabase.instance.client;
 
-  String error = "";
+  String hashpass(password){
+    final c1 = Crypt.sha256(password, salt: 'abcdefghijklmnop');
+    return(c1.toString());
+  }
 
-  final List usersList = [
-    {'email': 'gambasa', 'password': "1234"},
-    {'email': "123", 'password': "123"}
-  ];
+  Future<void> createAccount(String user, String email, String password) async {
+    print("new user $user, $email, ${hashpass(password)}");
+    await supabase.from('usuarios').insert({'nombre': user, 'contraseña': hashpass(password), 'email':email});
+  }
 
-  bool login(String email, String password) {
-    for (var element in usersList) {
-      if (email == element["email"] && password == element["password"]) {
-        encontrado = true;
-        break;
+  Future<bool> emailCheck(String email) async {
+    final response = await supabase.from('usuarios').select();
+    bool userExists = false;
+    for (var element in response) {
+      if (element["email"] == email) {
+        userExists = true;
       }
     }
-
-    if (encontrado) {
-      encontrado = false;
-      return true;
+    if (userExists) {
+      print("email in use");
+      return (true);
     } else {
-      return false;
+      print("email not in use");
+      return (false);
     }
   }
 
-  void createAccount(String user, String email, String password) {
-    print(usersList.toString());
-    for (var element in usersList) {
-      if (email == element["email"]) {
-        encontrado = true;
-        break;
+  Future<bool> userCheck(String email, String password) async {
+    final response = await supabase.from('usuarios').select();
+    bool userExists = false;
+    for (var element in response) {
+      if (element["email"] == email && hashpass(element["password"]) == hashpass(password)) {
+        userExists = true;
       }
     }
-
-    if (encontrado) {
-      error = "Este usuario ya existe";
-      encontrado = false;
+    if (userExists) {
+      print("email in use");
+      return (true);
     } else {
-      usersList.add({"email": email, "password": password});
+      print("email not in use");
+      return (false);
     }
-  }
-
-  String showError() {
-    return (error);
   }
 }

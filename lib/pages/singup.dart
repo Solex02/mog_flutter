@@ -5,6 +5,7 @@ import 'package:mog_flutter/widgets/TextField.dart';
 import 'package:mog_flutter/others/supabaseController.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/style.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SingUpPage extends StatefulWidget {
   const SingUpPage({super.key});
@@ -14,54 +15,106 @@ class SingUpPage extends StatefulWidget {
 }
 
 class _SingUpPageState extends State<SingUpPage> {
-  // Create a text controller and use it to retrieve the current value
-  // of the TextField.
-  final emailController = TextEditingController();
+  
+  //Controladores para coger el interior de los text Fields
+  final emailController = TextEditingController(); 
   final userNameController = TextEditingController();
   final passwordController = TextEditingController();
   final comfirmPasswordController = TextEditingController();
 
   final verificationController = TextEditingController();
 
+  //Iniciar el cliente de supabase
+  final supabase = Supabase.instance.client;
+
+  
+  //Linea de texto vacia para poder mostrarle errores al usuario
   String error = "";
 
+
+  //Referencia del codigo de supabaseController y resendController
   final supabaseController supa = supabaseController();
   final resendController resend = resendController();
 
-  final String apiUrl = 'https://api.resend.com/emails';
-  final String apiKey = "re_HCsSoSaD_Gh5rBokiYX37qmB47XReHzCT";
-
-  void createAccount() {
+  //Funcion que verifica si el email ya esta en uso, si existe da un error si no existe envia un email de verificacion y enseña un dialog
+  Future<void> doesEmailExist() async {
     if (emailController.text.isNotEmpty &&
         passwordController.text.isNotEmpty &&
         userNameController.text.isNotEmpty) {
-      supa.createAccount(userNameController.text, emailController.text,
-          passwordController.text);
-      setState(() {
-        error = supa.showError();
-        supa.error = "";
-      });
-    }
-    sendEmail();
-  }
-
-  void codeVerification(pin){
-    if(pin == resend.getVerifyCode()){
-      print("correct");
-    }
-    else{
-      print("incorrect");
+      if (await supa.emailCheck(emailController.text) ==
+          false) { //si el email no existe
+        sendEmail(); //enviar email con codigo de verificacion
+        buildDialog(); //enseñar alert dialog
+      } else {
+        setState(() {
+          error = "This email is already in use try to log in instead";
+        });
+      }
     }
   }
 
-  void sendEmail() {
-    if (emailController.text.isNotEmpty &&
-        passwordController.text.isNotEmpty &&
-        userNameController.text.isNotEmpty) {
-      resend.postData(userNameController.text, emailController.text);
+void sendEmail() {
+  if (emailController.text.isNotEmpty &&
+      passwordController.text.isNotEmpty &&
+      userNameController.text.isNotEmpty) {
+    int verificationCode = resend.generateVerifyCode();
+    resend.postData(userNameController.text, emailController.text, verificationCode);
+  }
+}
+
+  //funcion pora construir el alert dialog
+  void buildDialog() {
+    showDialog(
+      //if set to true allow to close popup by tapping out of the popup
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text("Insert Verification code"),
+        content: OTPTextField(
+          length: 5,
+          width: MediaQuery.of(context).size.width,
+          fieldWidth: 50,
+          style: TextStyle(fontSize: 17),
+          textFieldAlignment: MainAxisAlignment.spaceAround,
+          fieldStyle: FieldStyle.underline,
+          onCompleted: (pin) {
+            codeVerification(pin);
+            Navigator.of(context).pop();
+          },
+        ),
+        actions: [
+          ElevatedButton(
+            child: Text("Cancel"),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          )
+        ],
+        elevation: 24,
+      ),
+    );
+  }
+
+
+  // funcion para verificar que el codigo que se le ha enviado al usuairio por email es correcto
+  void codeVerification(pin) {
+    print("Entered PIN: $pin");
+    print("Stored Verification Code: ${resend.getVerifyCode()}");
+
+    if (pin.toString() == resend.getVerifyCode().toString()) {
+      print("Verification code correct");
+      supa.createAccount(userNameController.text, emailController.text, passwordController.text);
+    } else {
+      print("Verification code incorrect");
+      print(resend.getVerifyCode().toString());
+      print(pin.toString());
     }
   }
 
+  //funcion para enviar email
+  
+
+  //boton de back
   void back() {
     Navigator.pop(context);
     Navigator.push(
@@ -70,14 +123,7 @@ class _SingUpPageState extends State<SingUpPage> {
     );
   }
 
-  @override
-  void dispose() {
-    // Clean up the controller when the widget is disposed.
-    emailController.dispose();
-    userNameController.dispose();
-    passwordController.dispose();
-    super.dispose();
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -125,40 +171,7 @@ class _SingUpPageState extends State<SingUpPage> {
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ElevatedButton(
-              onPressed: () {
-                //createAccount();
-                showDialog(
-                  //if set to true allow to close popup by tapping out of the popup
-                  barrierDismissible: false,
-                  context: context,
-                  builder: (BuildContext context) => AlertDialog(
-                    title: Text("Insert Verification code"),
-                    content: OTPTextField(
-                      length: 5,
-                      width: MediaQuery.of(context).size.width,
-                      fieldWidth: 50,
-                      style: TextStyle(fontSize: 17),
-                      textFieldAlignment: MainAxisAlignment.spaceAround,
-                      fieldStyle: FieldStyle.underline,
-                      onCompleted: (pin) {
-                        codeVerification(pin);
-                      },
-                    ),
-                    actions: [
-                     
-                      ElevatedButton(
-                        child: Text("Cancel"),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      )
-                    ],
-                    elevation: 24,
-                  ),
-                );
-              },
-              child: Text("Create account")),
+          ElevatedButton(onPressed: () {/*doesEmailExist();*/ }, child: Text("Create account")),
           SizedBox(
             width: 20,
           ),
