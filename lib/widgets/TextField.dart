@@ -20,6 +20,9 @@ class CustomTextField extends StatelessWidget {
           if (states.contains(MaterialState.error)) {
             return Colors.red;
           }
+          if (states.contains(MaterialState.hovered)) {
+            return Colors.white;
+          }
           return Colors.white;
         }),
       ),
