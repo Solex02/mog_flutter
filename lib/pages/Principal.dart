@@ -1,6 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-
-
+import 'upload_content.dart'; // Importa el nuevo archivo
 
 class MainActivity extends StatefulWidget {
   @override
@@ -10,13 +11,25 @@ class MainActivity extends StatefulWidget {
 class _MainActivityState extends State<MainActivity> {
   int _currentIndex = 0;
 
-  // Lista de widgets correspondientes a cada ítem de la barra de navegación
-  final List<Widget> _screens = [
-    MenuPrincipal(),
-    TopScreen(),
-    UploadScreen(),
-    ProfileScreen(),
+  // Lista de publicaciones
+  List<Widget> _publications = [
+    
   ];
+
+  void handleUpload(String imagePath, String description) {
+    setState(() {
+      // Agrega la nueva publicación a la lista
+      _publications.add(
+        ImageItem(
+          imagePath: imagePath,
+          description: description,
+          logoImagePath: 'assets/images/oscar.png',
+          logoText: 'Gangzalo',
+        ),
+      );
+      _currentIndex = 0; // Cambia a la pantalla principal después de cargar
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,28 +37,44 @@ class _MainActivityState extends State<MainActivity> {
       appBar: AppBar(
         title: Row(
           children: [
-            // Logo de la aplicación
             Image.asset('assets/images/iogo.png', width: 40, height: 40),
-            SizedBox(width: 8), // Espacio entre el logo y el título
+            SizedBox(width: 8),
             Text(
               'Motorship Official Gallery',
               style: TextStyle(
-                fontSize: 20, // Tamaño del texto
-                fontWeight: FontWeight.bold, // Negrita
-                fontFamily: 'YourFontFamily', // Cambia 'YourFontFamily' por el nombre de tu fuente personalizada
-                color: Colors.black, // Color del texto
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'YourFontFamily',
+                color: Colors.black,
               ),
             ),
           ],
         ),
       ),
-      body: Container(color: Color.fromARGB(255, 22, 29, 77),
-        child: IndexedStack(
-          index: _currentIndex,
-          children: _screens,
-          
+      body: Stack(
+      children: [
+        Container(
+          color: Color.fromARGB(255, 37, 45, 95),
+          child: IndexedStack(
+            index: _currentIndex,
+            children: [
+              // Use un ListView.builder para mostrar la lista de publicaciones
+              ListView.builder(
+                itemCount: _publications.length,
+                itemBuilder: (context, index) => _publications[index],
+              ),
+              TopScreen(),
+              Container(), // Contenedor vacío para la pantalla de carga
+              ProfileScreen(),
+            ],
+          ),
         ),
-      ),
+        if (_currentIndex == 2) // Muestra la pantalla de carga solo cuando se selecciona "Upload"
+          Positioned.fill(
+            child: UploadContent(onUpload: handleUpload),
+          ),
+      ],
+    ),
       bottomNavigationBar: BottomNavigationBar(
         items: [
           BottomNavigationBarItem(
@@ -78,30 +107,14 @@ class _MainActivityState extends State<MainActivity> {
   }
 }
 
+
 class MenuPrincipal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
       
       children: [
-        ImageItem(
-          imagePath: 'assets/images/Autobello.jpg',
-          description: 'Descripción de la imagen 1',
-          logoImagePath: 'assets/images/iogo.png',
-          logoText: 'Motorship1',
-        ),
-        ImageItem(
-          imagePath: 'assets/images/auto2.jpg',
-          description: 'Descripción de la imagen 2',
-          logoImagePath: 'assets/images/iogo.png',
-          logoText: 'Motorship2',
-        ),
-        ImageItem(
-          imagePath: 'assets/images/Autobello.jpg',
-          description: 'Descripción de la imagen 1',
-          logoImagePath: 'assets/images/iogo.png',
-          logoText: 'Motorship3',
-        ),
+        
         // Agrega más elementos según sea necesario
       ],
     );
@@ -182,6 +195,7 @@ class _ImageItemState extends State<ImageItem> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Align(
@@ -200,7 +214,7 @@ class _ImageItemState extends State<ImageItem> {
               Text(widget.logoText, style: TextStyle(color: Colors.white)),
             ],
           ),
-          Image.asset(widget.imagePath),
+          Image.file(File(widget.imagePath)),
           SizedBox(height: 14), // Margen por encima de los botones
           Container(
             margin: EdgeInsets.only(left: 9.0), // Ajusta el valor según el margen deseado
@@ -231,11 +245,10 @@ class _ImageItemState extends State<ImageItem> {
             ),
           ),
           SizedBox(height: 8), // Margen por debajo de los botones
-          Container(
-            margin: EdgeInsets.only(left: 18.0), // Ajusta el valor según el margen deseado
+          Padding(
+            padding: const EdgeInsets.only(left: 18.0, bottom: 40.0), // Ajusta los valores según el margen deseado
             child: Text(widget.description, style: TextStyle(color: Colors.white)),
           ),
-          Divider(),
         ],
       ),
     );
