@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'upload_content.dart'; // Importa el nuevo archivo
 
 class MainActivity extends StatefulWidget {
@@ -10,15 +13,40 @@ class MainActivity extends StatefulWidget {
 
 class _MainActivityState extends State<MainActivity> {
   int _currentIndex = 0;
+  List<Widget> _publications = [];
 
-  // Lista de publicaciones
-  List<Widget> _publications = [
-    
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // Carga las publicaciones guardadas al iniciar la aplicación
+    loadPublications();
+  }
+
+  // Guarda las publicaciones en SharedPreferences
+  Future<void> savePublications() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> serializedPublications =
+        _publications.map((widget) => jsonEncode((widget as ImageItem).toJson())).toList();
+    prefs.setStringList('publications', serializedPublications);
+  }
+
+  // Carga las publicaciones desde SharedPreferences
+  Future<void> loadPublications() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? serializedPublications = prefs.getStringList('publications');
+
+    if (serializedPublications != null) {
+      List<Widget> loadedPublications =
+          serializedPublications.map((json) => ImageItem.fromJson(jsonDecode(json))).toList();
+
+      setState(() {
+        _publications = loadedPublications;
+      });
+    }
+  }
 
   void handleUpload(String imagePath, String description) {
     setState(() {
-      // Agrega la nueva publicación a la lista
       _publications.add(
         ImageItem(
           imagePath: imagePath,
@@ -27,31 +55,37 @@ class _MainActivityState extends State<MainActivity> {
           logoText: 'Gangzalo',
         ),
       );
-      _currentIndex = 0; // Cambia a la pantalla principal después de cargar
+      _currentIndex = 0;
     });
+
+    // Guarda las publicaciones después de agregar una nueva
+    savePublications();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Image.asset('assets/images/iogo.png', width: 40, height: 40),
-            SizedBox(width: 8),
-            Text(
-              'Motorship Official Gallery',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'YourFontFamily',
-                color: Colors.black,
-              ),
+  
+  return Scaffold(
+    appBar: AppBar(
+      toolbarHeight: 40, // Ajusta el valor según tus necesidades
+      backgroundColor: Colors.white,
+      title: Row(
+        children: [
+          Image.asset('assets/images/iogo.png', width: 40, height: 40),
+          SizedBox(width: 8),
+          Text(
+            'Motorship Official Gallery',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'YourFontFamily',
+              color: Colors.black,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-      body: Stack(
+    ),
+    body: Stack(
       children: [
         Container(
           color: Color.fromARGB(255, 37, 45, 95),
@@ -75,36 +109,36 @@ class _MainActivityState extends State<MainActivity> {
           ),
       ],
     ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.flag),
-            label: 'Top',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.camera_alt),
-            label: 'Upload',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        currentIndex: _currentIndex,
-        unselectedItemColor: Colors.black,
-        selectedItemColor: Colors.grey,
-      ),
-    );
-  }
+    bottomNavigationBar: BottomNavigationBar(
+      items: [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.flag),
+          label: 'Top',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.camera_alt),
+          label: 'Upload',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Profile',
+        ),
+      ],
+      onTap: (index) {
+        setState(() {
+          _currentIndex = index;
+        });
+      },
+      currentIndex: _currentIndex,
+      unselectedItemColor: Colors.black,
+      selectedItemColor: Colors.grey,
+    ),
+  );
+}
 }
 
 
@@ -170,13 +204,28 @@ class ImageItem extends StatefulWidget {
     required this.logoText,
   });
 
+  // Nuevo constructor para cargar desde JSON
+  ImageItem.fromJson(Map<String, dynamic> json)
+      : imagePath = json['imagePath'],
+        description = json['description'],
+        logoImagePath = json['logoImagePath'],
+        logoText = json['logoText'];
+
+  // Convierte el widget a JSON
+  Map<String, dynamic> toJson() => {
+        'imagePath': imagePath,
+        'description': description,
+        'logoImagePath': logoImagePath,
+        'logoText': logoText,
+      };
+
   @override
   _ImageItemState createState() => _ImageItemState();
 }
 
 class _ImageItemState extends State<ImageItem> {
   int likeCount = 0;
-  bool isVoted = false; // Variable para indicar si se ha dado like
+  bool isVoted = false;
 
   void toggleVote() {
     setState(() {
@@ -194,7 +243,6 @@ class _ImageItemState extends State<ImageItem> {
       toggleVote();
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -215,7 +263,7 @@ class _ImageItemState extends State<ImageItem> {
             ],
           ),
           Image.file(File(widget.imagePath)),
-          SizedBox(height: 14), // Margen por encima de los botones
+          SizedBox(height: 8), // Margen por encima de los botones
           Container(
             margin: EdgeInsets.only(left: 9.0), // Ajusta el valor según el margen deseado
             child: Row(
@@ -229,7 +277,7 @@ class _ImageItemState extends State<ImageItem> {
                     color: isVoted ? Colors.white : Colors.white,
                   ),
                 ),
-                SizedBox(width: 1), // Espacio entre el icono y el campo de texto
+                SizedBox(width: 0), // Espacio entre el icono y el campo de texto
                 Text('${likeCount}', style: TextStyle(fontSize: 16, color: Colors.white)),
                 SizedBox(width: 16), // Espacio entre los botones
                 IconButton(
@@ -244,7 +292,7 @@ class _ImageItemState extends State<ImageItem> {
               ],
             ),
           ),
-          SizedBox(height: 8), // Margen por debajo de los botones
+          SizedBox(height: 0), // Margen por debajo de los botones
           Padding(
             padding: const EdgeInsets.only(left: 18.0, bottom: 40.0), // Ajusta los valores según el margen deseado
             child: Text(widget.description, style: TextStyle(color: Colors.white)),

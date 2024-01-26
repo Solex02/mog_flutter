@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class UploadContent extends StatefulWidget {
+  // Función de devolución de llamada para manejar la subida de contenido
   final Function(String, String) onUpload;
 
+  // Constructor que recibe la función de devolución de llamada como parámetro
   UploadContent({required this.onUpload});
 
   @override
@@ -12,16 +14,22 @@ class UploadContent extends StatefulWidget {
 }
 
 class _UploadContentState extends State<UploadContent> {
+  // Controlador de texto para la descripción
   late TextEditingController descriptionController;
+
+  // Ruta de la imagen seleccionada
   late String imagePath;
 
   @override
   void initState() {
     super.initState();
+
+    // Inicializa el controlador de texto y la ruta de la imagen
     descriptionController = TextEditingController();
     imagePath = '';
   }
 
+  // Método asincrónico para seleccionar una imagen de la galería
   Future<void> _pickImage() async {
     final ImagePicker _picker = ImagePicker();
     final XFile? pickedFile = await _picker.pickImage(
@@ -29,14 +37,19 @@ class _UploadContentState extends State<UploadContent> {
     );
 
     if (pickedFile != null) {
+      // Actualiza el estado con la ruta de la imagen seleccionada
       setState(() {
         imagePath = pickedFile.path;
       });
     }
   }
 
+  // Método para manejar la subida de contenido
   void handleUpload() {
+    // Obtiene la descripción del controlador de texto
     String description = descriptionController.text;
+
+    // Llama a la función de devolución de llamada con la ruta de la imagen y la descripción
     widget.onUpload(imagePath, description);
   }
 
@@ -50,7 +63,6 @@ class _UploadContentState extends State<UploadContent> {
       body: SingleChildScrollView(
         child: Container(
           width: double.infinity,
-          // Reduzco la altura del Container
           height: MediaQuery.of(context).size.height - kToolbarHeight,
           color: Color.fromARGB(255, 37, 45, 95),
           child: Padding(
@@ -58,6 +70,7 @@ class _UploadContentState extends State<UploadContent> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Botón para seleccionar imágenes
                 Row(
                   children: [
                     ElevatedButton(
@@ -71,6 +84,7 @@ class _UploadContentState extends State<UploadContent> {
                       ),
                     ),
                     SizedBox(width: 50),
+                    // Vista previa de la imagen seleccionada (si existe)
                     imagePath.isNotEmpty
                         ? Image.file(
                             File(imagePath),
@@ -82,6 +96,7 @@ class _UploadContentState extends State<UploadContent> {
                   ],
                 ),
                 SizedBox(height: 16),
+                // Campo de texto para la descripción
                 TextField(
                   controller: descriptionController,
                   style: TextStyle(color: Colors.white),
@@ -91,6 +106,7 @@ class _UploadContentState extends State<UploadContent> {
                   ),
                 ),
                 SizedBox(height: 16),
+                // Botón para subir contenido
                 ElevatedButton(
                   onPressed: handleUpload,
                   style: ElevatedButton.styleFrom(
