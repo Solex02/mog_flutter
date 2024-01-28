@@ -40,7 +40,7 @@ dependencies:
   supabase_flutter: ^2.3.0
   crypt: ^4.3.1
   flutter_animate: ^4.4.0 
-  
+  image_picker: ^1.0.7
 dev_dependencies:
   flutter_test:
     sdk: flutter

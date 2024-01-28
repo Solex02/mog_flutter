@@ -26,6 +26,7 @@ class resendController {
         'service_id': serviceId,
         "template_id": templateId,
         "user_id": userId,
+        "accessToken" : "cFHAZLPqwuC6ulVNfxUQ2",
         "template_params": {
           "user_name": userName,
           "user_email": userEmail,

@@ -11,7 +11,7 @@ class supabaseController {
 
   Future<void> createAccount(String user, String email, String password) async {
     print("new user $user, $email, ${hashpass(password)}");
-    await supabase.from('usuarios').insert({'nombre': user, 'contraseña': hashpass(password), 'email':email});
+    await supabase.from('usuarios').insert({'nombre': user, 'contraseña': hashpass(password), 'email':email, 'seguidores':0, 'seguidos':0, 'marchas_totales': 0});
   }
 
   Future<bool> emailCheck(String email) async {

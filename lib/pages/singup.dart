@@ -97,19 +97,21 @@ void sendEmail() {
 
 
   // funcion para verificar que el codigo que se le ha enviado al usuairio por email es correcto
-  void codeVerification(pin) {
-    print("Entered PIN: $pin");
-    print("Stored Verification Code: ${resend.getVerifyCode()}");
+  void codeVerification(String pin) {
+  print("Entered PIN: $pin");
+  int storedVerificationCode = resend.getVerifyCode();
 
-    if (pin.toString() == resend.getVerifyCode().toString()) {
-      print("Verification code correct");
-      supa.createAccount(userNameController.text, emailController.text, passwordController.text);
-    } else {
-      print("Verification code incorrect");
-      print(resend.getVerifyCode().toString());
-      print(pin.toString());
-    }
+  if (pin != null && storedVerificationCode != null && pin.toString() == storedVerificationCode.toString()) {
+    print("Verification code correct");
+    supa.createAccount(userNameController.text, emailController.text, passwordController.text);
+  } else {
+    print("Verification code incorrect");
+    print(storedVerificationCode);
+    print(pin.toString());
   }
+}
+
+
 
   //funcion para enviar email
   
@@ -127,7 +129,13 @@ void sendEmail() {
 
   @override
   Widget build(BuildContext context) {
-    var children2 = [
+    return Scaffold(
+      body: SingleChildScrollView(
+        physics: NeverScrollableScrollPhysics(),
+        child: Container(
+          color: Color.fromARGB(255, 22, 29, 77),
+          child: Column(
+            children: [
       SizedBox(height: 200),
       Container(
         margin: EdgeInsets.only(right: 115, bottom: 30),
@@ -171,7 +179,7 @@ void sendEmail() {
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ElevatedButton(onPressed: () {/*doesEmailExist();*/ }, child: Text("Create account")),
+          ElevatedButton(onPressed: () {doesEmailExist(); }, child: Text("Create account")),
           SizedBox(
             width: 20,
           ),
@@ -186,13 +194,8 @@ void sendEmail() {
           )
         ],
       )
-    ];
-    return Scaffold(
-      body: Container(
-          color: Color.fromARGB(255, 22, 29, 77),
-          child: Column(
-            children: children2,
-          )),
+    ],
+          )),)
     );
   }
 }
