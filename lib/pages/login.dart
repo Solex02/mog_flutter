@@ -41,6 +41,9 @@ class _LoginPageState extends State<LoginPage> {
       }
     }
   }
+  
+  
+
 
   @override
   void dispose() {
@@ -53,7 +56,8 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(physics: NeverScrollableScrollPhysics(), child: Container(
+      resizeToAvoidBottomInset: false,
+      body: Container(
           color: Color.fromARGB(255, 22, 29, 77),
           child: Column(
             children: [
@@ -112,7 +116,7 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               )
             ],
-          )),)
+          )),
     );
   }
 }

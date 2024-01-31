@@ -36,6 +36,19 @@ class _SingUpPageState extends State<SingUpPage> {
   final supabaseController supa = supabaseController();
   final resendController resend = resendController();
 
+
+  void confirmPassword(){
+    if(passwordController.text == comfirmPasswordController.text){
+      doesEmailExist();
+    }
+    else{
+      setState(() {
+          error = "Passwords do not match";
+        });
+    }
+  }
+
+
   //Funcion que verifica si el email ya esta en uso, si existe da un error si no existe envia un email de verificacion y enseña un dialog
   Future<void> doesEmailExist() async {
     if (emailController.text.isNotEmpty &&
@@ -54,12 +67,18 @@ class _SingUpPageState extends State<SingUpPage> {
   }
 
 void sendEmail() {
-  if (emailController.text.isNotEmpty &&
+  try{
+ if (emailController.text.isNotEmpty &&
       passwordController.text.isNotEmpty &&
       userNameController.text.isNotEmpty) {
     int verificationCode = resend.generateVerifyCode();
     resend.postData(userNameController.text, emailController.text, verificationCode);
   }
+  }
+  catch(e){
+    error = e.toString();
+  }
+ 
 }
 
   //funcion pora construir el alert dialog
@@ -78,8 +97,11 @@ void sendEmail() {
           textFieldAlignment: MainAxisAlignment.spaceAround,
           fieldStyle: FieldStyle.underline,
           onCompleted: (pin) {
-            codeVerification(pin);
+            if(pin.length >= 5){
+               codeVerification(pin);
             Navigator.of(context).pop();
+            }
+           
           },
         ),
         actions: [
@@ -130,9 +152,8 @@ void sendEmail() {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        physics: NeverScrollableScrollPhysics(),
-        child: Container(
+      resizeToAvoidBottomInset: false,
+      body: Container(
           color: Color.fromARGB(255, 22, 29, 77),
           child: Column(
             children: [
@@ -179,7 +200,7 @@ void sendEmail() {
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ElevatedButton(onPressed: () {doesEmailExist(); }, child: Text("Create account")),
+          ElevatedButton(onPressed: () {confirmPassword(); }, child: Text("Create account")),
           SizedBox(
             width: 20,
           ),
@@ -195,7 +216,7 @@ void sendEmail() {
         ],
       )
     ],
-          )),)
+          )),
     );
   }
 }

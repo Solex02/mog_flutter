@@ -5,12 +5,13 @@ class supabaseController {
   final supabase = Supabase.instance.client;
 
   String hashpass(password){
-    final c1 = Crypt.sha256(password, salt: 'abcdefghijklmnop');
-    return(c1.toString());
+      final c1 = Crypt.sha256(password, salt: 'abcdefghijklmnop');
+      return(c1.toString());
+    
   }
 
   Future<void> createAccount(String user, String email, String password) async {
-    print("new user $user, $email, ${hashpass(password)}");
+    //print("new user $user, $email, ${hashpass(password)}");
     await supabase.from('usuarios').insert({'nombre': user, 'contraseña': hashpass(password), 'email':email, 'seguidores':0, 'seguidos':0, 'marchas_totales': 0});
   }
 
@@ -23,10 +24,10 @@ class supabaseController {
       }
     }
     if (userExists) {
-      print("email in use");
+      //print("email in use");
       return (true);
     } else {
-      print("email not in use");
+      //print("email not in use");
       return (false);
     }
   }
@@ -35,15 +36,19 @@ class supabaseController {
     final response = await supabase.from('usuarios').select();
     bool userExists = false;
     for (var element in response) {
-      if (element["email"] == email && hashpass(element["password"]) == hashpass(password)) {
-        userExists = true;
+      if (element["email"] == email ) {
+
+        if(element["contraseña"] == hashpass(password)){
+          userExists = true;
+        }
+        
       }
     }
     if (userExists) {
-      print("email in use");
+      //print("email exist");
       return (true);
     } else {
-      print("email not in use");
+      //print("email not in use");
       return (false);
     }
   }
