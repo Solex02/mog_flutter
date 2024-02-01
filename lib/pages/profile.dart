@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key? key, required this.title}) : super(key: key);
-  final String title; // Título de la página de perfil
+  const ProfilePage({Key? key}) : super(key: key);
+  // Título de la página de perfil
 
   @override
   State<ProfilePage> createState() =>
@@ -26,6 +26,7 @@ class _ProfilePageState extends State<ProfilePage> {
         MediaQuery.of(context).size.width; // Ancho de la pantalla
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       // Estructura básica de la página
       body: Container(
         // Contenedor principal
@@ -238,7 +239,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return userPublications.isEmpty // Verificar si no hay publicaciones
         ? Center(
             child: Container(
-              margin: EdgeInsets.only(top: 200),
+              margin: EdgeInsets.only(top: 100),
               child: Text(
                 "Aun no hay publicaciones :(", // Mensaje de no hay publicaciones
                 style: TextStyle(
@@ -303,8 +304,9 @@ class _ProfilePageState extends State<ProfilePage> {
         return Dialog(
           backgroundColor: Colors.black,
           child: Container(
-            padding: EdgeInsets.all(20),
-            width: double.infinity,
+            padding: EdgeInsets.all(10),
+            width: MediaQuery.of(context).size.width *
+                0.8, // Ancho del diálogo ajustado
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -318,19 +320,21 @@ class _ProfilePageState extends State<ProfilePage> {
                     fontFamily: 'Roboto',
                   ),
                 ),
-                SizedBox(height: 20), // Espacio entre elementos
+                SizedBox(height: 10), // Espacio entre elementos
                 _buildTextField(
                   controller: nameController,
                   labelText: "Nombre",
                   maxLength: 20,
                 ),
-                SizedBox(height: 20), // Espacio entre elementos
+                SizedBox(height: 10), // Espacio entre elementos
                 _buildTextField(
                   controller: descriptionController,
                   labelText: "Descripción",
                   maxLength: 100,
                 ),
-                SizedBox(height: 20), // Espacio entre elementos
+                SizedBox(
+                    height:
+                        20), // Aumenta el espacio entre los campos de texto y los botones
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -353,13 +357,11 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        savedName =
-                            nameController.text; // Guardar el nombre editado
-                        savedDescription = descriptionController
-                            .text; // Guardar la descripción editada
-                        Navigator.pop(context); // Cerrar el diálogo
+                        savedName = nameController.text;
+                        savedDescription = descriptionController.text;
+                        Navigator.pop(context);
                         setState(() {
-                          isEditing = false; // Cambiar el estado de edición
+                          isEditing = false;
                         });
                       },
                       style: ElevatedButton.styleFrom(

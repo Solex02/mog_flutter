@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mog_flutter/pages/Principal.dart';
 import 'package:mog_flutter/pages/singup.dart';
 import 'package:mog_flutter/widgets/TextField.dart';
 import 'package:mog_flutter/others/supabaseController.dart';
@@ -30,7 +31,15 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> loginApp() async {
     if (emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
-      if (await supa.userCheck(emailController.text, passwordController.text) == true) {
+      if (await supa.userCheck(emailController.text, passwordController.text) ==
+          true) {
+        print("entrar");
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MainActivity()),
+        );
+
         setState(() {
           error = "";
         });
@@ -41,9 +50,6 @@ class _LoginPageState extends State<LoginPage> {
       }
     }
   }
-  
-  
-
 
   @override
   void dispose() {

@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:mog_flutter/pages/profile.dart';
+import 'package:mog_flutter/pages/ranking.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'upload_content.dart'; // Importa el nuevo archivo
 
@@ -25,8 +27,9 @@ class _MainActivityState extends State<MainActivity> {
   // Guarda las publicaciones en SharedPreferences
   Future<void> savePublications() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> serializedPublications =
-        _publications.map((widget) => jsonEncode((widget as ImageItem).toJson())).toList();
+    List<String> serializedPublications = _publications
+        .map((widget) => jsonEncode((widget as ImageItem).toJson()))
+        .toList();
     prefs.setStringList('publications', serializedPublications);
   }
 
@@ -36,8 +39,9 @@ class _MainActivityState extends State<MainActivity> {
     List<String>? serializedPublications = prefs.getStringList('publications');
 
     if (serializedPublications != null) {
-      List<Widget> loadedPublications =
-          serializedPublications.map((json) => ImageItem.fromJson(jsonDecode(json))).toList();
+      List<Widget> loadedPublications = serializedPublications
+          .map((json) => ImageItem.fromJson(jsonDecode(json)))
+          .toList();
 
       setState(() {
         _publications = loadedPublications;
@@ -64,132 +68,93 @@ class _MainActivityState extends State<MainActivity> {
 
   @override
   Widget build(BuildContext context) {
-  
-  return Scaffold(
-    appBar: AppBar(
-      toolbarHeight: 40, // Ajusta el valor según tus necesidades
-      backgroundColor: Colors.white,
-      title: Row(
+    return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 40, // Ajusta el valor según tus necesidades
+        backgroundColor: Colors.white,
+        title: Row(
+          children: [
+            Image.asset('assets/images/iogo.png', width: 40, height: 40),
+            SizedBox(width: 8),
+            Text(
+              'Motorship Official Gallery',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'YourFontFamily',
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: Stack(
         children: [
-          Image.asset('assets/images/iogo.png', width: 40, height: 40),
-          SizedBox(width: 8),
-          Text(
-            'Motorship Official Gallery',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'YourFontFamily',
-              color: Colors.black,
+          Container(
+            color: Color.fromARGB(255, 37, 45, 95),
+            child: IndexedStack(
+              index: _currentIndex,
+              children: [
+                // Use un ListView.builder para mostrar la lista de publicaciones
+                ListView.builder(
+                  itemCount: _publications.length,
+                  itemBuilder: (context, index) => _publications[index],
+                ),
+
+                Container(), // Contenedor vacío para la pantalla de carga
+              ],
             ),
           ),
+          if (_currentIndex ==
+              1) // Muestra la pantalla de carga solo cuando se selecciona "Upload"
+            Positioned.fill(
+              child: RankingPage(),
+            ),
+          if (_currentIndex ==
+              2) // Muestra la pantalla de carga solo cuando se selecciona "Upload"
+            Positioned.fill(
+              child: UploadContent(onUpload: handleUpload),
+            ),
+          if (_currentIndex ==
+              3) // Muestra la pantalla de carga solo cuando se selecciona "Upload"
+            Positioned.fill(
+              child: ProfilePage(),
+            ),
         ],
       ),
-    ),
-    body: Stack(
-      children: [
-        Container(
-          color: Color.fromARGB(255, 37, 45, 95),
-          child: IndexedStack(
-            index: _currentIndex,
-            children: [
-              // Use un ListView.builder para mostrar la lista de publicaciones
-              ListView.builder(
-                itemCount: _publications.length,
-                itemBuilder: (context, index) => _publications[index],
-              ),
-              TopScreen(),
-              Container(), // Contenedor vacío para la pantalla de carga
-              ProfileScreen(),
-            ],
+      bottomNavigationBar: BottomNavigationBar(
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
           ),
-        ),
-        if (_currentIndex == 2) // Muestra la pantalla de carga solo cuando se selecciona "Upload"
-          Positioned.fill(
-            child: UploadContent(onUpload: handleUpload),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.flag),
+            label: 'Top',
           ),
-      ],
-    ),
-    bottomNavigationBar: BottomNavigationBar(
-      items: [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.flag),
-          label: 'Top',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.camera_alt),
-          label: 'Upload',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Profile',
-        ),
-      ],
-      onTap: (index) {
-        setState(() {
-          _currentIndex = index;
-        });
-      },
-      currentIndex: _currentIndex,
-      unselectedItemColor: Colors.black,
-      selectedItemColor: Colors.grey,
-    ),
-  );
-}
-}
-
-
-class MenuPrincipal extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      
-      children: [
-        
-        // Agrega más elementos según sea necesario
-      ],
+          BottomNavigationBarItem(
+            icon: Icon(Icons.camera_alt),
+            label: 'Upload',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        currentIndex: _currentIndex,
+        unselectedItemColor: Colors.black,
+        selectedItemColor: Colors.grey,
+      ),
     );
   }
 }
 
-class TopScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        // Contenido de la pantalla Top
-      ],
-    );
-  }
-}
-
-class UploadScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        // Contenido de la pantalla Upload
-      ],
-    );
-  }
-}
-
-class ProfileScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        // Contenido de la pantalla Profile
-      ],
-    );
-  }
-}
-                        //LISTA DE PUBLICACIONES
-
-
+//LISTA DE PUBLICACIONES
 
 class ImageItem extends StatefulWidget {
   final String imagePath;
@@ -265,7 +230,8 @@ class _ImageItemState extends State<ImageItem> {
           Image.file(File(widget.imagePath)),
           SizedBox(height: 8), // Margen por encima de los botones
           Container(
-            margin: EdgeInsets.only(left: 9.0), // Ajusta el valor según el margen deseado
+            margin: EdgeInsets.only(
+                left: 9.0), // Ajusta el valor según el margen deseado
             child: Row(
               children: [
                 IconButton(
@@ -277,8 +243,10 @@ class _ImageItemState extends State<ImageItem> {
                     color: isVoted ? Colors.white : Colors.white,
                   ),
                 ),
-                SizedBox(width: 0), // Espacio entre el icono y el campo de texto
-                Text('${likeCount}', style: TextStyle(fontSize: 16, color: Colors.white)),
+                SizedBox(
+                    width: 0), // Espacio entre el icono y el campo de texto
+                Text('${likeCount}',
+                    style: TextStyle(fontSize: 16, color: Colors.white)),
                 SizedBox(width: 16), // Espacio entre los botones
                 IconButton(
                   onPressed: () {
@@ -294,8 +262,11 @@ class _ImageItemState extends State<ImageItem> {
           ),
           SizedBox(height: 0), // Margen por debajo de los botones
           Padding(
-            padding: const EdgeInsets.only(left: 18.0, bottom: 40.0), // Ajusta los valores según el margen deseado
-            child: Text(widget.description, style: TextStyle(color: Colors.white)),
+            padding: const EdgeInsets.only(
+                left: 18.0,
+                bottom: 40.0), // Ajusta los valores según el margen deseado
+            child:
+                Text(widget.description, style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
