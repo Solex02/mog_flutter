@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mog_flutter/others/rankingController.dart';
 
 class RankingPage extends StatefulWidget {
   const RankingPage({super.key});
@@ -8,9 +9,16 @@ class RankingPage extends StatefulWidget {
 }
 
 class _RankingPageState extends State<RankingPage> {
+  final rankingController rank = rankingController();
+
+  late int liketop1 = rank.getLikes(0);
+  late int liketop2 = rank.getLikes(1);
+  late int liketop3 = rank.getLikes(2);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Container(
         color: Color.fromARGB(255, 22, 29, 77),
         child: Column(
@@ -50,6 +58,11 @@ class _RankingPageState extends State<RankingPage> {
                         child: DecoratedBox(
                           decoration: BoxDecoration(
                               color: Color.fromARGB(255, 52, 65, 151)),
+                          child: Center(
+                              child: Text(
+                            "#2\n $liketop2",
+                            style: TextStyle(color: Colors.white),
+                          )),
                         ),
                       ),
                     ],
@@ -74,6 +87,11 @@ class _RankingPageState extends State<RankingPage> {
                         child: DecoratedBox(
                           decoration: BoxDecoration(
                               color: Color.fromARGB(255, 52, 65, 151)),
+                          child: Center(
+                              child: Text(
+                            "Data",
+                            style: TextStyle(color: Colors.white),
+                          )),
                         ),
                       ),
                     ],
@@ -98,6 +116,11 @@ class _RankingPageState extends State<RankingPage> {
                         child: DecoratedBox(
                           decoration: BoxDecoration(
                               color: Color.fromARGB(255, 52, 65, 151)),
+                          child: Center(
+                              child: Text(
+                            "Data",
+                            style: TextStyle(color: Colors.white),
+                          )),
                         ),
                       ),
                     ],
