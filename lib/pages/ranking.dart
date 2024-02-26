@@ -11,10 +11,6 @@ class RankingPage extends StatefulWidget {
 class _RankingPageState extends State<RankingPage> {
   final rankingController rank = rankingController();
 
-  late int liketop1 = rank.getLikes(0);
-  late int liketop2 = rank.getLikes(1);
-  late int liketop3 = rank.getLikes(2);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,12 +55,26 @@ class _RankingPageState extends State<RankingPage> {
                           decoration: BoxDecoration(
                               color: Color.fromARGB(255, 52, 65, 151)),
                           child: Center(
-                              child: Text(
-                            "#2\n $liketop2",
-                            style: TextStyle(color: Colors.white),
-                          )),
+                              child: Center(
+                            child: FutureBuilder<int>(
+                              future: rank.getLikes(1),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return Text(
+                                    "#2\n${snapshot.data}",
+                                    style: TextStyle(color: Colors.white),
+                                  );
+                                } else if (snapshot.hasError) {
+                                  return Text(
+                                    "Error",
+                                    style: TextStyle(color: Colors.white),
+                                  );
+                                }
+                                return CircularProgressIndicator();
+                              },
+                            ),),
                         ),
-                      ),
+                      ),),
                     ],
                   ),
                 ),
@@ -88,10 +98,23 @@ class _RankingPageState extends State<RankingPage> {
                           decoration: BoxDecoration(
                               color: Color.fromARGB(255, 52, 65, 151)),
                           child: Center(
-                              child: Text(
-                            "Data",
-                            style: TextStyle(color: Colors.white),
-                          )),
+                               child: FutureBuilder<int>(
+                              future: rank.getLikes(0),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return Text(
+                                    "#2\n${snapshot.data}",
+                                    style: TextStyle(color: Colors.white),
+                                  );
+                                } else if (snapshot.hasError) {
+                                  return Text(
+                                    "Error",
+                                    style: TextStyle(color: Colors.white),
+                                  );
+                                }
+                                return CircularProgressIndicator();
+                              },
+                            ),),
                         ),
                       ),
                     ],
@@ -117,10 +140,23 @@ class _RankingPageState extends State<RankingPage> {
                           decoration: BoxDecoration(
                               color: Color.fromARGB(255, 52, 65, 151)),
                           child: Center(
-                              child: Text(
-                            "Data",
-                            style: TextStyle(color: Colors.white),
-                          )),
+                              child: FutureBuilder<int>(
+                              future: rank.getLikes(2),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return Text(
+                                    "#2\n${snapshot.data}",
+                                    style: TextStyle(color: Colors.white),
+                                  );
+                                } else if (snapshot.hasError) {
+                                  return Text(
+                                    "Error",
+                                    style: TextStyle(color: Colors.white),
+                                  );
+                                }
+                                return CircularProgressIndicator();
+                              },
+                            ),),
                         ),
                       ),
                     ],
