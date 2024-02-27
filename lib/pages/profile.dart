@@ -1,55 +1,79 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+// Inicialización de SupabaseClient con la URL y la clave de la API.
+final supabase = SupabaseClient('https://ngejlljkgxzpnwznpddk.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5nZWpsbGprZ3h6cG53em5wZGRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTY0MDY1NjMsImV4cCI6MjAxMTk4MjU2M30.nlZnIiHCjiThvu-cLj_aBPYaGE1knPFWXOhCkJQDLL4');
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
-  // Título de la página de perfil
 
   @override
-  State<ProfilePage> createState() =>
-      _ProfilePageState(); // Crea el estado de la página de perfil
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // Variables de estado
-  int publicationCount = 0; // Contador de publicaciones
-  bool isEditing = false; // Indica si se está editando el perfil
-  TextEditingController nameController =
-      TextEditingController(); // Controlador del campo de nombre
-  TextEditingController descriptionController =
-      TextEditingController(); // Controlador del campo de descripción
-  String savedName = ""; // Nombre guardado
-  String savedDescription = ""; // Descripción guardada
+  // Declaración de variables y controladores necesarios.
+  int publicationCount = 0;
+  bool isEditing = false;
+  TextEditingController nameController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
+  String savedName = "";
+  String savedDescription = "";
+  List<String> userPublications = [
+    'assets/images/ferrari.png',
+    'assets/images/honda.png',
+    'assets/images/koenigsegg.png',
+    'assets/images/regera.png',
+  ];
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth =
-        MediaQuery.of(context).size.width; // Ancho de la pantalla
+    double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      // Estructura básica de la página
       body: Container(
-        // Contenedor principal
-        padding: EdgeInsets.all(20), // Relleno alrededor del contenedor
-        width:
-            screenWidth, // Ancho del contenedor igual al ancho de la pantalla
+        padding: EdgeInsets.all(20),
+        width: screenWidth,
         decoration: BoxDecoration(
-            color:
-                Color.fromARGB(255, 22, 29, 77)), // Decoración del contenedor
+          color: Color.fromARGB(255, 22, 29, 77),
+        ),
         child: Column(
-          // Columna que contiene los elementos
           children: <Widget>[
-            // Sección de perfil
-            SizedBox(height: 20), // Espacio entre elementos
-            Icon(
-              // Icono del perfil
-              Icons.account_circle,
-              size: 120,
-              color: Colors.white,
+            // Sección de la imagen del perfil y botón de edición.
+            // Muestra la imagen y un botón para editar la imagen del perfil.
+            Stack(
+              children: [
+                Icon(
+                  Icons.account_circle,
+                  size: 120,
+                  color: Colors.white,
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.black,
+                    ),
+                    padding: EdgeInsets.all(1),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.edit,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        _showEditProfileDialog(); // Método para mostrar el diálogo de edición.
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 10), // Espacio entre elementos
+            // Sección del nombre del usuario.
             Text(
-              // Nombre del perfil
               "Mario Barea",
               style: TextStyle(
                 color: Colors.white,
@@ -57,62 +81,41 @@ class _ProfilePageState extends State<ProfilePage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 20), // Espacio entre elementos
+            // Sección de estadísticas como seguidores y seguidos.
             Row(
-              // Fila para las estadísticas de seguidores y seguidos
-              mainAxisAlignment:
-                  MainAxisAlignment.spaceAround, // Alineación de los elementos
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                _buildStat("Seguidores", "0"), // Estadísticas de seguidores
-                _buildStat("Seguidos", "0"), // Estadísticas de seguidos
+                _buildStat("Seguidores", "0"),
+                _buildStat("Seguidos", "0"),
               ],
             ),
-            SizedBox(height: 20), // Espacio entre elementos
+            // Divisores entre secciones.
             Divider(
-              // Línea divisoria
               color: Color.fromARGB(255, 240, 238, 238),
               thickness: 2.0,
               height: 0.0,
             ),
-            _buildProfileSection(screenWidth), // Sección de perfil
-            SizedBox(height: 20), // Espacio entre elementos
-            ElevatedButton(
-              // Botón para editar perfil
-              onPressed: () {
-                _showEditProfileDialog(); // Mostrar el diálogo de edición de perfil
-              },
-              style: ElevatedButton.styleFrom(
-                primary: Colors.black,
-              ),
-              child: Text(
-                isEditing ? "Guardar" : "Editar perfil",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            SizedBox(height: 20), // Espacio entre elementos
+            // Sección de perfil, incluyendo nombre y descripción.
+            _buildProfileSection(screenWidth),
+            // Divisor entre secciones.
             Divider(
-              // Otra línea divisoria
               color: Color.fromARGB(255, 240, 238, 238),
               thickness: 2.0,
               height: 0.0,
             ),
-            _buildGridView(), // Cuadrícula de publicaciones
+            // Sección de publicaciones del usuario.
+            _buildGridView(userPublications),
           ],
         ),
       ),
     );
   }
 
-  // Construcción de estadísticas
+  // Construcción de widgets para mostrar estadísticas.
   Widget _buildStat(String title, String value) {
     return Column(
       children: [
         Text(
-          // Título de la estadística
           title,
           style: TextStyle(
             color: Colors.white,
@@ -121,7 +124,6 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
         Text(
-          // Valor de la estadística
           value,
           style: TextStyle(
             color: Colors.white,
@@ -133,50 +135,46 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Sección de perfil
+  // Construcción de la sección de perfil, incluyendo nombre y descripción.
   Widget _buildProfileSection(double screenWidth) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         isEditing
             ? Container(
-                // Contenedor para campos de texto de edición
                 width: screenWidth,
                 padding: EdgeInsets.only(left: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildTextField(
-                      // Campo de texto para nombre
                       controller: nameController,
                       labelText: "Nombre",
                       maxLength: 20,
                     ),
                     _buildTextField(
-                      // Campo de texto para descripción
                       controller: descriptionController,
                       labelText: "Descripción",
                       maxLength: 100,
                     ),
-                    SizedBox(height: 50), // Espacio entre elementos
+                    SizedBox(height: 50),
                   ],
                 ),
               )
             : savedName.isNotEmpty || savedDescription.isNotEmpty
                 ? Column(
-                    // Mostrar nombre y descripción guardados
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildListTile("Nombre", savedName),
                       _buildListTile("Descripción", savedDescription),
                     ],
                   )
-                : Container(), // No mostrar nada si no hay información guardada
+                : Container(),
       ],
     );
   }
 
-  // Construcción de etiqueta
+  // Construcción de un label de texto.
   Widget _buildLabel(String label) {
     return Padding(
       padding: const EdgeInsets.only(left: 20, bottom: 5),
@@ -191,7 +189,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Construcción de campo de texto
+  // Construcción de un campo de texto.
   Widget _buildTextField({
     required TextEditingController controller,
     required String labelText,
@@ -211,7 +209,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Construcción de elemento de lista
+  // Construcción de un elemento de lista.
   Widget _buildListTile(String title, String value) {
     return ListTileTheme(
       contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
@@ -232,16 +230,14 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Construcción de cuadrícula de publicaciones
-  Widget _buildGridView() {
-    List<String> userPublications = []; // Lista de publicaciones del usuario
-
-    return userPublications.isEmpty // Verificar si no hay publicaciones
+  // Construcción de la cuadrícula de publicaciones del usuario.
+  Widget _buildGridView(List<String> userPublications) {
+    return userPublications.isEmpty
         ? Center(
             child: Container(
               margin: EdgeInsets.only(top: 100),
               child: Text(
-                "Aun no hay publicaciones :(", // Mensaje de no hay publicaciones
+                "Aun no hay publicaciones :(",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,
@@ -251,13 +247,12 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           )
         : SizedBox(
-            height: 300, // Altura de la cuadrícula de publicaciones
+            height: 500, // PUBLICACIONES GRINDVIEW //
             child: GridView.builder(
               primary: false,
               padding: const EdgeInsets.all(20),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: determineCrossAxisCount(userPublications
-                    .length), // Determinar el número de columnas en función del número de publicaciones
+                crossAxisCount: 3,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
               ),
@@ -266,12 +261,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 publicationCount++;
                 return Container(
                   child: InkWell(
-                    onTap: () {
-                      // Handle your callback.
-                    },
+                    onTap: () {},
                     splashColor: Colors.brown.withOpacity(0.5),
-                    child: Image(
-                      image: AssetImage(userPublications[index]),
+                    child: Image.network(
+                      userPublications[index],
                       height: 80,
                       width: 80,
                       fit: BoxFit.cover,
@@ -283,20 +276,7 @@ class _ProfilePageState extends State<ProfilePage> {
           );
   }
 
-  // Determinar el número de columnas en la cuadrícula
-  int determineCrossAxisCount(int itemCount) {
-    if (itemCount == 1) {
-      return 1;
-    } else if (itemCount == 2) {
-      return 2;
-    } else if (itemCount == 3) {
-      return 3;
-    } else {
-      return 2;
-    }
-  }
-
-  // Mostrar el diálogo de edición de perfil
+  // Muestra el diálogo de edición del perfil.
   void _showEditProfileDialog() {
     showDialog(
       context: context,
@@ -305,8 +285,7 @@ class _ProfilePageState extends State<ProfilePage> {
           backgroundColor: Colors.black,
           child: Container(
             padding: EdgeInsets.all(10),
-            width: MediaQuery.of(context).size.width *
-                0.8, // Ancho del diálogo ajustado
+            width: MediaQuery.of(context).size.width * 0.8,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -320,21 +299,19 @@ class _ProfilePageState extends State<ProfilePage> {
                     fontFamily: 'Roboto',
                   ),
                 ),
-                SizedBox(height: 10), // Espacio entre elementos
+                SizedBox(height: 10),
                 _buildTextField(
                   controller: nameController,
                   labelText: "Nombre",
                   maxLength: 20,
                 ),
-                SizedBox(height: 10), // Espacio entre elementos
+                SizedBox(height: 10),
                 _buildTextField(
                   controller: descriptionController,
                   labelText: "Descripción",
                   maxLength: 100,
                 ),
-                SizedBox(
-                    height:
-                        20), // Aumenta el espacio entre los campos de texto y los botones
+                SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
