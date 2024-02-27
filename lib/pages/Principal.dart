@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:mog_flutter/pages/profile.dart';
+import 'package:mog_flutter/pages/ranking.dart';
 import 'package:flutter/material.dart';
 import 'upload_content.dart'; // Importa el nuevo archivo
 import 'package:supabase/supabase.dart';
@@ -31,8 +33,7 @@ class _MainActivityState extends State<MainActivity> {
     String imageData = base64Encode(bytes);
     final response = await supabase
         .from('Publicacionpureba')
-        .insert({'image_data': imageData, 'description': description})
-        .execute();
+        .insert({'image_data': imageData, 'description': description});
 
     _loadPublications(); // Recarga las publicaciones después de insertar
     setState(() {
@@ -41,11 +42,11 @@ class _MainActivityState extends State<MainActivity> {
   }
 
   void _loadPublications() async {
-    final response = await supabase.from('Publicacionpureba').select().execute();
+    final response = await supabase.from('Publicacionpureba').select();
 
-    if (response != null && response.data != null) {
+    if (response != null) {
       List<Map<String, dynamic>> publications =
-          (response.data as List<dynamic>).cast<Map<String, dynamic>>();
+          (response).cast<Map<String, dynamic>>();
 
       setState(() {
         _publications = publications.map((publication) {
@@ -103,9 +104,20 @@ class _MainActivityState extends State<MainActivity> {
               ],
             ),
           ),
-          if (_currentIndex == 2) // Muestra la pantalla de carga solo cuando se selecciona "Upload"
+          if (_currentIndex ==
+              1) // Muestra la pantalla de carga solo cuando se selecciona "Upload"
+            Positioned.fill(
+              child: RankingPage(),
+            ),
+          if (_currentIndex ==
+              2) // Muestra la pantalla de carga solo cuando se selecciona "Upload"
             Positioned.fill(
               child: UploadContent(onUpload: handleUpload),
+            ),
+          if (_currentIndex ==
+              3) // Muestra la pantalla de carga solo cuando se selecciona "Upload"
+            Positioned.fill(
+              child: ProfilePage(),
             ),
         ],
       ),
@@ -143,7 +155,8 @@ class _MainActivityState extends State<MainActivity> {
 
 // Widget para mostrar una publicación individual
 class ImageItem extends StatefulWidget {
-  final String imageData; // Cambiado a String para contener la ruta de la imagen desde Supabase
+  final String
+      imageData; // Cambiado a String para contener la ruta de la imagen desde Supabase
   final String description;
   final String logoImagePath;
   final String logoText;
@@ -225,8 +238,10 @@ class _ImageItemState extends State<ImageItem> {
                     ),
                   ),
                 ),
-                SizedBox(width: 0), // Espacio entre el icono y el campo de texto
-                Text('${likeCount}', style: TextStyle(fontSize: 16, color: Colors.white)),
+                SizedBox(
+                    width: 0), // Espacio entre el icono y el campo de texto
+                Text('${likeCount}',
+                    style: TextStyle(fontSize: 16, color: Colors.white)),
                 SizedBox(width: 16), // Espacio entre los botones
                 IconButton(
                   onPressed: () {
@@ -243,7 +258,8 @@ class _ImageItemState extends State<ImageItem> {
           SizedBox(height: 0), // Margen por debajo de los botones
           Padding(
             padding: const EdgeInsets.only(left: 18.0, bottom: 40.0),
-            child: Text(widget.description, style: TextStyle(color: Colors.white)),
+            child:
+                Text(widget.description, style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
