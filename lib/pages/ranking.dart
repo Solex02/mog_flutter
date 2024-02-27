@@ -55,26 +55,50 @@ class _RankingPageState extends State<RankingPage> {
                           decoration: BoxDecoration(
                               color: Color.fromARGB(255, 52, 65, 151)),
                           child: Center(
-                              child: Center(
-                            child: FutureBuilder<int>(
-                              future: rank.getLikes(1),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData) {
-                                  return Text(
-                                    "#2\n${snapshot.data}",
-                                    style: TextStyle(color: Colors.white),
-                                  );
-                                } else if (snapshot.hasError) {
-                                  return Text(
-                                    "Error",
-                                    style: TextStyle(color: Colors.white),
-                                  );
-                                }
-                                return CircularProgressIndicator();
-                              },
-                            ),),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "#2",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 20),
+                                ),
+                                FutureBuilder<int>(
+                                  future: rank.getLikes(1),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      return Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            "${snapshot.data} ",
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                          Icon(
+                                            Icons.favorite,
+                                            color: Colors.white,
+                                          )
+                                        ],
+                                      );
+                                    } else if (snapshot.hasError) {
+                                      return Text(
+                                        "Error",
+                                        style: TextStyle(color: Colors.white),
+                                      );
+                                    }
+                                    return CircularProgressIndicator();
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),),
+                      ),
                     ],
                   ),
                 ),
@@ -98,23 +122,48 @@ class _RankingPageState extends State<RankingPage> {
                           decoration: BoxDecoration(
                               color: Color.fromARGB(255, 52, 65, 151)),
                           child: Center(
-                               child: FutureBuilder<int>(
-                              future: rank.getLikes(0),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData) {
-                                  return Text(
-                                    "#2\n${snapshot.data}",
-                                    style: TextStyle(color: Colors.white),
-                                  );
-                                } else if (snapshot.hasError) {
-                                  return Text(
-                                    "Error",
-                                    style: TextStyle(color: Colors.white),
-                                  );
-                                }
-                                return CircularProgressIndicator();
-                              },
-                            ),),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "#1",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 20),
+                                ),
+                                FutureBuilder<int>(
+                                  future: rank.getLikes(0),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      return Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            "${snapshot.data} ",
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                          Icon(
+                                            Icons.favorite,
+                                            color: Colors.white,
+                                          )
+                                        ],
+                                      );
+                                    } else if (snapshot.hasError) {
+                                      return Text(
+                                        "Error",
+                                        style: TextStyle(color: Colors.white),
+                                      );
+                                    }
+                                    return CircularProgressIndicator();
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -140,23 +189,48 @@ class _RankingPageState extends State<RankingPage> {
                           decoration: BoxDecoration(
                               color: Color.fromARGB(255, 52, 65, 151)),
                           child: Center(
-                              child: FutureBuilder<int>(
-                              future: rank.getLikes(2),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData) {
-                                  return Text(
-                                    "#2\n${snapshot.data}",
-                                    style: TextStyle(color: Colors.white),
-                                  );
-                                } else if (snapshot.hasError) {
-                                  return Text(
-                                    "Error",
-                                    style: TextStyle(color: Colors.white),
-                                  );
-                                }
-                                return CircularProgressIndicator();
-                              },
-                            ),),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "#3",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 20),
+                                ),
+                                FutureBuilder<int>(
+                                  future: rank.getLikes(2),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      return Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            "${snapshot.data} ",
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                          Icon(
+                                            Icons.favorite,
+                                            color: Colors.white,
+                                          )
+                                        ],
+                                      );
+                                    } else if (snapshot.hasError) {
+                                      return Text(
+                                        "Error",
+                                        style: TextStyle(color: Colors.white),
+                                      );
+                                    }
+                                    return CircularProgressIndicator();
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -166,13 +240,6 @@ class _RankingPageState extends State<RankingPage> {
             ),
             SizedBox(
               height: 50,
-            ),
-            Text(
-              "Previous Weeks",
-              style: TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
             ),
           ],
         ),
