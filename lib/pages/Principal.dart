@@ -33,7 +33,7 @@ class _MainActivityState extends State<MainActivity> {
     String imageData = base64Encode(bytes);
 
     final response = await supabase
-        .from('Publicacionpureba')
+        .from('publicaciones')
         .insert({'image_data': imageData, 'description': description});
 
     _loadPublications(); // Recargar las publicaciones después de insertar
@@ -43,7 +43,7 @@ class _MainActivityState extends State<MainActivity> {
   }
 
   void _loadPublications() async {
-    final response = await supabase.from('Publicacionpureba').select();
+    final response = await supabase.from('publicaciones').select();
 
     if (response != null) {
       List<Map<String, dynamic>> publications =
@@ -53,12 +53,15 @@ class _MainActivityState extends State<MainActivity> {
         _publications = publications.map((publication) {
           String imageData = publication['image_data'];
           String description = publication['description'];
+          int likes = publication['likes'];
+          int user_id = publication['id_usuario'];
 
           return ImageItem(
             imageData: imageData,
             description: description,
+            likes: likes,
             logoImagePath: 'assets/images/oscar.png',
-            logoText: 'Gangzalo',
+            Textid: user_id,
           );
         }).toList();
       });
@@ -113,7 +116,7 @@ class _MainActivityState extends State<MainActivity> {
               ],
             ),
           ),
-           if (_currentIndex ==
+          if (_currentIndex ==
               1) // Muestra la pantalla de carga solo cuando se selecciona "Upload"
             Positioned.fill(
               child: RankingPage(),
@@ -126,7 +129,7 @@ class _MainActivityState extends State<MainActivity> {
           if (_currentIndex ==
               3) // Muestra la pantalla de carga solo cuando se selecciona "Upload"
             Positioned.fill(
-              child: ProfilePage(),
+              child: ProfilePage(user_id: 3),
             ),
         ],
       ),
@@ -162,22 +165,22 @@ class _MainActivityState extends State<MainActivity> {
   }
 }
 
-
-                        //LISTA DE PUBLICACIONES
-
-
+//LISTA DE PUBLICACIONES
 
 class ImageItem extends StatefulWidget {
-  final String imageData; // Cambiado a String para contener la ruta de la imagen desde Supabase
+  final String
+      imageData; // Cambiado a String para contener la ruta de la imagen desde Supabase
   final String description;
+  int likes;
   final String logoImagePath;
-  final String logoText;
+  final int Textid;
 
   ImageItem({
     required this.imageData, // Cambiado de File a String
     required this.description,
+    required this.likes,
     required this.logoImagePath,
-    required this.logoText,
+    required this.Textid,
   });
 
   @override
@@ -186,7 +189,15 @@ class ImageItem extends StatefulWidget {
 
 class _ImageItemState extends State<ImageItem> {
   int likeCount = 0;
-  bool isVoted = false; // Variable para indicar si se ha dado like
+  bool isVoted = false;
+
+  Future<String> getName(user_id) async {
+    final response = await supabase
+        .from('usuarios')
+        .select("nombre")
+        .eq("id_usuarios", user_id);
+    return response[0]["nombre"];
+  }
 
   void toggleVote() {
     setState(() {
@@ -197,81 +208,106 @@ class _ImageItemState extends State<ImageItem> {
   void handleVote() {
     setState(() {
       if (isVoted) {
-        likeCount--;
+        widget.likes--;
       } else {
-        likeCount++;
+        widget.likes++;
       }
       toggleVote();
     });
   }
 
   @override
-Widget build(BuildContext context) {
-  // Decodificar los datos base64
-  Uint8List imageDataBytes = base64Decode(widget.imageData);
+  Widget build(BuildContext context) {
+    // Decodificar los datos base64
+    Uint8List imageDataBytes = base64Decode(widget.imageData);
 
-  // Retornar el widget ImageItem con la imagen cargada desde datos decodificados
-  return Align(
-    alignment: Alignment.centerLeft,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            // Logo a la izquierda de la publicación
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Image.asset(widget.logoImagePath, width: 30, height: 30),
-            ),
-            // Texto a la derecha del logo
-            Text(widget.logoText, style: TextStyle(color: Colors.white)),
-          ],
-        ),
-        // Mostrar la imagen desde los datos decodificados
-        Image.memory(
-          imageDataBytes,
-          width: MediaQuery.of(context).size.width, // Ancho máximo
-          fit: BoxFit.cover, // Ajuste de la imagen
-        ),
-        SizedBox(height: 8), // Margen por encima de los botones
-        Container(
-          margin: EdgeInsets.only(left: 9.0),
-          child: Row(
+    // Retornar el widget ImageItem con la imagen cargada desde datos decodificados
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              SizedBox(
-                width: 40, // Ancho específico para el botón
-                child: IconButton(
-                  onPressed: () {
-                    handleVote();
-                  },
-                  icon: Icon(
-                    isVoted ? Icons.favorite : Icons.favorite_border,
-                    color: isVoted ? Colors.white : Colors.white,
-                  ),
-                ),
+              // Logo a la izquierda de la publicación
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Image.asset(widget.logoImagePath, width: 30, height: 30),
               ),
-              SizedBox(width: 0), // Espacio entre el icono y el campo de texto
-              Text('${likeCount}', style: TextStyle(fontSize: 16, color: Colors.white)),
-              SizedBox(width: 16), // Espacio entre los botones
-              IconButton(
-                onPressed: () {
-                  // Lógica para el botón de compartir
+              // Texto a la derecha del logo
+              FutureBuilder<String>(
+                future: getName(widget.Textid),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "${snapshot.data} ",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text(
+                      "Error",
+                      style: TextStyle(color: Colors.white),
+                    );
+                  }
+                  return CircularProgressIndicator();
                 },
-                icon: Icon(
-                  isVoted ? Icons.share : Icons.share,
-                  color: Colors.white,
-                ),
               ),
             ],
           ),
-        ),
-        SizedBox(height: 0), // Margen por debajo de los botones
-        Padding(
-          padding: const EdgeInsets.only(left: 18.0, bottom: 40.0),
-          child: Text(widget.description, style: TextStyle(color: Colors.white)),
-        ),
-      ],
-    ),
-  );
-}
+          // Mostrar la imagen desde los datos decodificados
+          Image.memory(
+            imageDataBytes,
+            width: MediaQuery.of(context).size.width, // Ancho máximo
+            fit: BoxFit.cover, // Ajuste de la imagen
+          ),
+          SizedBox(height: 8), // Margen por encima de los botones
+          Container(
+            margin: EdgeInsets.only(left: 9.0),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 40, // Ancho específico para el botón
+                  child: IconButton(
+                    onPressed: () {
+                      handleVote();
+                    },
+                    icon: Icon(
+                      isVoted ? Icons.favorite : Icons.favorite_border,
+                      color: isVoted ? Colors.white : Colors.white,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                    width: 0), // Espacio entre el icono y el campo de texto
+                Text('${widget.likes}',
+                    style: TextStyle(fontSize: 16, color: Colors.white)),
+                SizedBox(width: 16), // Espacio entre los botones
+                IconButton(
+                  onPressed: () {
+                    // Lógica para el botón de compartir
+                  },
+                  icon: Icon(
+                    isVoted ? Icons.share : Icons.share,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 0), // Margen por debajo de los botones
+          Padding(
+            padding: const EdgeInsets.only(left: 18.0, bottom: 40.0),
+            child:
+                Text(widget.description, style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
 }

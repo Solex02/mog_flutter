@@ -6,7 +6,9 @@ final supabase = SupabaseClient('https://ngejlljkgxzpnwznpddk.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5nZWpsbGprZ3h6cG53em5wZGRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTY0MDY1NjMsImV4cCI6MjAxMTk4MjU2M30.nlZnIiHCjiThvu-cLj_aBPYaGE1knPFWXOhCkJQDLL4');
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({Key? key, required this.user_id}) : super(key: key);
+
+  final int user_id;
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -29,10 +31,11 @@ class _ProfilePageState extends State<ProfilePage> {
     'assets/images/koenigsegg.png',
     'assets/images/regera.png',
   ];
+
   @override
   void initState() {
     super.initState();
-    getUser(2);
+    getUser(widget.user_id);
   }
 
   Future<void> getUser(int id_usuario) async {
