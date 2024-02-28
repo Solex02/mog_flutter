@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:mog_flutter/pages/profile.dart';
-import 'package:mog_flutter/pages/ranking.dart';
 import 'package:flutter/material.dart';
 import 'upload_content.dart'; // Importa el nuevo archivo
 import 'package:supabase/supabase.dart';
 import 'package:uuid/uuid.dart';
+import 'package:mog_flutter/pages/profile.dart';
+import 'package:mog_flutter/pages/ranking.dart';
 
 final supabase = SupabaseClient(
   'https://ngejlljkgxzpnwznpddk.supabase.co',
@@ -167,11 +167,11 @@ class _MainActivityState extends State<MainActivity> {
 
 //LISTA DE PUBLICACIONES
 
-class ImageItem extends StatefulWidget {
+class ImageItem extends StatelessWidget {
   final String
       imageData; // Cambiado a String para contener la ruta de la imagen desde Supabase
   final String description;
-  int likes;
+  final int likes;
   final String logoImagePath;
   final int Textid;
 
@@ -184,42 +184,9 @@ class ImageItem extends StatefulWidget {
   });
 
   @override
-  _ImageItemState createState() => _ImageItemState();
-}
-
-class _ImageItemState extends State<ImageItem> {
-  int likeCount = 0;
-  bool isVoted = false;
-
-  Future<String> getName(user_id) async {
-    final response = await supabase
-        .from('usuarios')
-        .select("nombre")
-        .eq("id_usuarios", user_id);
-    return response[0]["nombre"];
-  }
-
-  void toggleVote() {
-    setState(() {
-      isVoted = !isVoted;
-    });
-  }
-
-  void handleVote() {
-    setState(() {
-      if (isVoted) {
-        widget.likes--;
-      } else {
-        widget.likes++;
-      }
-      toggleVote();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     // Decodificar los datos base64
-    Uint8List imageDataBytes = base64Decode(widget.imageData);
+    Uint8List imageDataBytes = base64Decode(imageData);
 
     // Retornar el widget ImageItem con la imagen cargada desde datos decodificados
     return Align(
@@ -232,11 +199,11 @@ class _ImageItemState extends State<ImageItem> {
               // Logo a la izquierda de la publicación
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Image.asset(widget.logoImagePath, width: 30, height: 30),
+                child: Image.asset(logoImagePath, width: 30, height: 30),
               ),
               // Texto a la derecha del logo
               FutureBuilder<String>(
-                future: getName(widget.Textid),
+                future: getName(Textid),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return Row(
@@ -269,45 +236,79 @@ class _ImageItemState extends State<ImageItem> {
           SizedBox(height: 8), // Margen por encima de los botones
           Container(
             margin: EdgeInsets.only(left: 9.0),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 40, // Ancho específico para el botón
-                  child: IconButton(
-                    onPressed: () {
-                      handleVote();
-                    },
-                    icon: Icon(
-                      isVoted ? Icons.favorite : Icons.favorite_border,
-                      color: isVoted ? Colors.white : Colors.white,
-                    ),
-                  ),
-                ),
-                SizedBox(
-                    width: 0), // Espacio entre el icono y el campo de texto
-                Text('${widget.likes}',
-                    style: TextStyle(fontSize: 16, color: Colors.white)),
-                SizedBox(width: 16), // Espacio entre los botones
-                IconButton(
-                  onPressed: () {
-                    // Lógica para el botón de compartir
-                  },
-                  icon: Icon(
-                    isVoted ? Icons.share : Icons.share,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
+            child: LikeButton(
+              initialLikeCount: likes,
             ),
           ),
           SizedBox(height: 0), // Margen por debajo de los botones
           Padding(
             padding: const EdgeInsets.only(left: 18.0, bottom: 40.0),
-            child:
-                Text(widget.description, style: TextStyle(color: Colors.white)),
+            child: Text(description, style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
+    );
+  }
+
+  Future<String> getName(int user_id) async {
+    final response = await supabase
+        .from('usuarios')
+        .select("nombre")
+        .eq("id_usuarios", user_id);
+    return response[0]["nombre"];
+  }
+}
+
+class LikeButton extends StatefulWidget {
+  final int initialLikeCount;
+
+  const LikeButton({Key? key, required this.initialLikeCount}) : super(key: key);
+
+  @override
+  _LikeButtonState createState() => _LikeButtonState();
+}
+
+class _LikeButtonState extends State<LikeButton> {
+  late int likeCount;
+  late bool isVoted;
+
+  @override
+  void initState() {
+    super.initState();
+    likeCount = widget.initialLikeCount;
+    isVoted = false;
+  }
+
+  void handleVote() {
+    setState(() {
+      if (isVoted) {
+        likeCount--;
+      } else {
+        likeCount++;
+      }
+      isVoted = !isVoted;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 40, // Ancho específico para el botón
+          child: IconButton(
+            onPressed: () {
+              handleVote();
+            },
+            icon: Icon(
+              isVoted ? Icons.favorite : Icons.favorite_border,
+              color: isVoted ? Colors.white : Colors.white,
+            ),
+          ),
+        ),
+        SizedBox(width: 0), // Espacio entre el icono y el campo de texto
+        Text('${likeCount}', style: TextStyle(fontSize: 16, color: Colors.white)),
+      ],
     );
   }
 }
