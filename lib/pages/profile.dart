@@ -15,6 +15,9 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   // Declaración de variables y controladores necesarios.
   int publicationCount = 0;
+  int segidores = 0;
+  int seguidos = 0;
+  String nombre = "";
   bool isEditing = false;
   TextEditingController nameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
@@ -26,6 +29,22 @@ class _ProfilePageState extends State<ProfilePage> {
     'assets/images/koenigsegg.png',
     'assets/images/regera.png',
   ];
+  @override
+  void initState() {
+    super.initState();
+    getUser(2);
+  }
+
+  Future<void> getUser(int id_usuario) async {
+    final data =
+        await supabase.from('usuarios').select().eq("id_usuarios", id_usuario);
+
+    setState(() {
+      segidores = data[0]["seguidores"];
+      seguidos = data[0]["seguidos"];
+      nombre = data[0]["nombre"];
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +93,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             // Sección del nombre del usuario.
             Text(
-              "Mario Barea",
+              nombre,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 22,
@@ -85,8 +104,46 @@ class _ProfilePageState extends State<ProfilePage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                _buildStat("Seguidores", "0"),
-                _buildStat("Seguidos", "0"),
+                Column(
+                  children: [
+                    Text(
+                      "Seguidores",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontFamily: 'Roboto',
+                      ),
+                    ),
+                    Text(
+                      segidores.toString(),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontFamily: 'Roboto',
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text(
+                      "Seguidos",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontFamily: 'Roboto',
+                      ),
+                    ),
+                    Text(
+                      seguidos.toString(),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontFamily: 'Roboto',
+                      ),
+                    ),
+                  ],
+                )
               ],
             ),
             // Divisores entre secciones.
@@ -108,30 +165,6 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
         ),
       ),
-    );
-  }
-
-  // Construcción de widgets para mostrar estadísticas.
-  Widget _buildStat(String title, String value) {
-    return Column(
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontFamily: 'Roboto',
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontFamily: 'Roboto',
-          ),
-        ),
-      ],
     );
   }
 
