@@ -21,6 +21,7 @@ class MainActivity extends StatefulWidget {
 class _MainActivityState extends State<MainActivity> {
   int _currentIndex = 0;
   List<Widget> _publications = [];
+  
 
   @override
   void initState() {
@@ -206,15 +207,26 @@ class ImageItem extends StatelessWidget {
                 future: getName(Textid),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "${snapshot.data} ",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ],
+                    return GestureDetector(
+                      onTap: () {
+                        // Navegar a la pantalla de perfil
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProfilePage(user_id: Textid),
+                          ),
+                        );
+                      },
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "${snapshot.data} ",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ],
+                      ),
                     );
                   } else if (snapshot.hasError) {
                     return Text(
