@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-
 class UploadContent extends StatefulWidget {
   final Function(String, String) onUpload;
 
@@ -47,60 +46,74 @@ class _UploadContentState extends State<UploadContent> {
       appBar: AppBar(
         title: Text('Subir Foto', style: TextStyle(color: Colors.white)),
         backgroundColor: Color.fromARGB(255, 37, 45, 95),
+        centerTitle: true,
       ),
-      body: SingleChildScrollView(
+      backgroundColor: Color.fromARGB(255, 54, 62, 116),
+      body: Center(
+  
         child: Container(
-          width: double.infinity,
-          // Reduzco la altura del Container
-          height: MediaQuery.of(context).size.height - kToolbarHeight,
-          color: Color.fromARGB(255, 37, 45, 95),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
+          
+          width: MediaQuery.of(context).size.width * 0.8,
+          padding: EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            
+            color: Color.fromARGB(255, 37, 45, 95),
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          child: SingleChildScrollView(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
-                  children: [
-                    ElevatedButton(
-                      onPressed: _pickImage,
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.white,
-                      ),
-                      child: Text(
-                        'Seleccionar Imagen',
-                        style: TextStyle(color: Colors.blue),
-                      ),
+                ElevatedButton.icon(
+                  onPressed: _pickImage,
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
                     ),
-                    SizedBox(width: 50),
-                    imagePath.isNotEmpty
-                        ? Image.file(
-                            File(imagePath),
-                            height: 100,
-                            width: 100,
-                            fit: BoxFit.cover,
-                          )
-                        : Container(),
-                  ],
+                  ),
+                  icon: Icon(Icons.image, color: const Color.fromARGB(255, 37, 45, 95)),
+                  label: Text(
+                    'Seleccionar Imagen',
+                    style: TextStyle(color: const Color.fromARGB(255, 37, 45, 95)),
+                  ),
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: 20),
+                imagePath.isNotEmpty
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: Image.file(
+                          File(imagePath),
+                          height: 200,
+                          width: 200,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Container(),
+                SizedBox(height: 20),
                 TextField(
                   controller: descriptionController,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     labelText: 'Descripción',
                     labelStyle: TextStyle(color: Colors.white),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
                   ),
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: handleUpload,
                   style: ElevatedButton.styleFrom(
                     primary: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
                   ),
                   child: Text(
                     'Subir',
-                    style: TextStyle(color: Colors.blue),
-                    
+                    style: TextStyle(color: const Color.fromARGB(255, 37, 45, 95)),
                   ),
                 ),
               ],
