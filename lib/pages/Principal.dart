@@ -35,7 +35,7 @@ class _MainActivityState extends State<MainActivity> {
 
     final response = await supabase
         .from('publicaciones')
-        .insert({'image_data': imageData, 'description': description});
+        .insert({'image_data': imageData, "id_usuario": 1, 'description': description, "likes": 0});
 
     _loadPublications(); // Recargar las publicaciones después de insertar
     setState(() {
