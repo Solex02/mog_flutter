@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:convert';
 
 final supabase = SupabaseClient('https://ngejlljkgxzpnwznpddk.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5nZWpsbGprZ3h6cG53em5wZGRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTY0MDY1NjMsImV4cCI6MjAxMTk4MjU2M30.nlZnIiHCjiThvu-cLj_aBPYaGE1knPFWXOhCkJQDLL4');
@@ -39,6 +40,7 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
     super.initState();
     getUser(widget.user_id);
     getBio(widget.user_id);
+    _loadUserPublications(widget.user_id);
   }
 
   Future<void> getUser(int id_usuario) async {
@@ -73,6 +75,19 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
     });
   }
 
+  Future<void> _loadUserPublications(int userId) async {
+    final response =
+        await supabase.from('publicaciones').select().eq("id_usuario", userId);
+
+    final List<Map<String, dynamic>> publications =
+        (response as List).cast<Map<String, dynamic>>();
+    setState(() {
+      userPublications = publications
+          .map<String>((publication) => publication['image_data'] as String)
+          .toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -84,6 +99,7 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
           Container(
             padding: EdgeInsets.all(20),
             width: screenWidth,
+            height: MediaQuery.of(context).size.height,
             decoration: BoxDecoration(
               color: Color.fromARGB(255, 22, 29, 77),
             ),
@@ -304,8 +320,8 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
                   child: InkWell(
                     onTap: () {},
                     splashColor: Colors.brown.withOpacity(0.5),
-                    child: Image.network(
-                      userPublications[index],
+                    child: Image.memory(
+                      base64.decode(userPublications[index]),
                       height: 80,
                       width: 80,
                       fit: BoxFit.cover,
