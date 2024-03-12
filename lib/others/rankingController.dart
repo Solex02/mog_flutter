@@ -23,4 +23,15 @@ class rankingController {
 
     return idUsuario;
   }
+
+  Future<String> getImage(int puesto) async {
+    final publicaciones = await supabase
+        .from('publicaciones')
+        .select()
+        .order('likes', ascending: false);
+
+    String image = publicaciones[puesto]["image_data"];
+
+    return image;
+  }
 }

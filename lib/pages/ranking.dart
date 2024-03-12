@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:mog_flutter/others/rankingController.dart';
+import 'package:mog_flutter/pages/profile.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RankingPage extends StatefulWidget {
   const RankingPage({super.key});
@@ -9,7 +14,39 @@ class RankingPage extends StatefulWidget {
 }
 
 class _RankingPageState extends State<RankingPage> {
+  final supabase = Supabase.instance.client;
   final rankingController rank = rankingController();
+
+  @override
+  void initState() {
+    super.initState();
+    getImage();
+  }
+
+  String image2 = "";
+  String image1 = "";
+  String image3 = "";
+
+  int userid1 = 0;
+  int userid2 = 0;
+  int userid3 = 0;
+
+  void getImage() async {
+    final publicaciones = await supabase
+        .from('publicaciones')
+        .select()
+        .order('likes', ascending: false);
+
+    setState(() {
+      image2 = publicaciones[1]["image_data"];
+      image1 = publicaciones[0]["image_data"];
+      image3 = publicaciones[2]["image_data"];
+
+      userid2 = publicaciones[1]["id_usuario"];
+      userid1 = publicaciones[0]["id_usuario"];
+      userid3 = publicaciones[2]["id_usuario"];
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,14 +76,25 @@ class _RankingPageState extends State<RankingPage> {
                     children: [
                       InkWell(
                           onTap: () {
-                            print("prueba");
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    ProfilePage(user_id: userid2),
+                              ),
+                            );
                           }, // Handle your callback.
                           splashColor: Colors.brown.withOpacity(0.5),
-                          child: Image(
-                            image: AssetImage('assets/images/podium.png'),
-                            height: 80,
+                          child: Container(
+                            child: Image.memory(
+                              base64Decode(image2),
+                              width: MediaQuery.of(context)
+                                  .size
+                                  .width, // Ancho máximo
+                              fit: BoxFit.cover, // Ajuste de la imagen
+                            ),
                             width: 80,
-                            fit: BoxFit.cover,
+                            height: 80,
                           )),
                       SizedBox(
                         width: 100,
@@ -107,13 +155,26 @@ class _RankingPageState extends State<RankingPage> {
                   child: Column(
                     children: [
                       InkWell(
-                          onTap: () {}, // Handle your callback.
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    ProfilePage(user_id: userid1),
+                              ),
+                            );
+                          }, // Handle your callback.
                           splashColor: Colors.brown.withOpacity(0.5),
-                          child: Image(
-                            image: AssetImage('assets/images/podium.png'),
-                            height: 80,
+                          child: Container(
+                            child: Image.memory(
+                              base64Decode(image2),
+                              width: MediaQuery.of(context)
+                                  .size
+                                  .width, // Ancho máximo
+                              fit: BoxFit.cover, // Ajuste de la imagen
+                            ),
                             width: 80,
-                            fit: BoxFit.cover,
+                            height: 80,
                           )),
                       SizedBox(
                         width: 100,
@@ -174,13 +235,26 @@ class _RankingPageState extends State<RankingPage> {
                   child: Column(
                     children: [
                       InkWell(
-                          onTap: () {}, // Handle your callback.
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    ProfilePage(user_id: userid3),
+                              ),
+                            );
+                          }, // Handle your callback.
                           splashColor: Colors.brown.withOpacity(0.5),
-                          child: Image(
-                            image: AssetImage('assets/images/podium.png'),
-                            height: 80,
+                          child: Container(
+                            child: Image.memory(
+                              base64Decode(image2),
+                              width: MediaQuery.of(context)
+                                  .size
+                                  .width, // Ancho máximo
+                              fit: BoxFit.cover, // Ajuste de la imagen
+                            ),
                             width: 80,
-                            fit: BoxFit.cover,
+                            height: 80,
                           )),
                       SizedBox(
                         width: 100,
