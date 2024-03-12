@@ -19,7 +19,11 @@ class _ProfilePageState extends State<ProfilePage> {
   int publicationCount = 0;
   int segidores = 0;
   int seguidos = 0;
+  String image_data = "";
   String nombre = "";
+  String nombre_perfil = "";
+  String descripcion = "";
+
   bool isEditing = false;
   TextEditingController nameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
@@ -36,6 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     getUser(widget.user_id);
+    getBio(widget.user_id);
   }
 
   Future<void> getUser(int id_usuario) async {
@@ -49,123 +54,146 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
+  Future<void> getBio(int id_usuario) async {
+    final data =
+        await supabase.from('usuarios').select().eq("id_usuarios", id_usuario);
+
+    setState(() {
+      nombre_perfil = data[0]["nombre_perfil"] ?? ""; // Manejo de valor nulo
+      descripcion = data[0]["descripcion"] ?? ""; // Manejo de valor nulo
+    });
+  }
+
+  Future<void> getPublicaciones(String id_publicaciones) async {
+    final data = await supabase
+        .from('publicaciones')
+        .select()
+        .eq("id_publicaciones", id_publicaciones);
+
+    setState(() {
+      image_data = data[0]["image_data"];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: Container(
-        padding: EdgeInsets.all(20),
-        width: screenWidth,
-        decoration: BoxDecoration(
-          color: Color.fromARGB(255, 22, 29, 77),
-        ),
-        child: Column(
-          children: <Widget>[
-            // Sección de la imagen del perfil y botón de edición.
-            // Muestra la imagen y un botón para editar la imagen del perfil.
-            Stack(
-              children: [
-                Icon(
-                  Icons.account_circle,
-                  size: 120,
-                  color: Colors.white,
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.black,
-                    ),
-                    padding: EdgeInsets.all(1),
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.edit,
-                        color: Colors.white,
+      body: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.all(20),
+          width: screenWidth,
+          decoration: BoxDecoration(
+            color: Color.fromARGB(255, 22, 29, 77),
+          ),
+          child: Column(
+            children: <Widget>[
+              // Sección de la imagen del perfil y botón de edición.
+              // Muestra la imagen y un botón para editar la imagen del perfil.
+              Stack(
+                children: [
+                  Icon(
+                    Icons.account_circle,
+                    size: 120,
+                    color: Colors.white,
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.black,
                       ),
-                      onPressed: () {
-                        _showEditProfileDialog(); // Método para mostrar el diálogo de edición.
-                      },
+                      padding: EdgeInsets.all(1),
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.edit,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {
+                          _showEditProfileDialog(); // Método para mostrar el diálogo de edición.
+                        },
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            // Sección del nombre del usuario.
-            Text(
-              nombre,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+                ],
               ),
-            ),
-            // Sección de estadísticas como seguidores y seguidos.
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                Column(
-                  children: [
-                    Text(
-                      "Seguidores",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontFamily: 'Roboto',
-                      ),
-                    ),
-                    Text(
-                      segidores.toString(),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontFamily: 'Roboto',
-                      ),
-                    ),
-                  ],
+              // Sección del nombre del usuario.
+              Text(
+                nombre,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
                 ),
-                Column(
-                  children: [
-                    Text(
-                      "Seguidos",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontFamily: 'Roboto',
+              ),
+              // Sección de estadísticas como seguidores y seguidos.
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  Column(
+                    children: [
+                      Text(
+                        "Seguidores",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontFamily: 'Roboto',
+                        ),
                       ),
-                    ),
-                    Text(
-                      seguidos.toString(),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontFamily: 'Roboto',
+                      Text(
+                        segidores.toString(),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontFamily: 'Roboto',
+                        ),
                       ),
-                    ),
-                  ],
-                )
-              ],
-            ),
-            // Divisores entre secciones.
-            Divider(
-              color: Color.fromARGB(255, 240, 238, 238),
-              thickness: 2.0,
-              height: 0.0,
-            ),
-            // Sección de perfil, incluyendo nombre y descripción.
-            _buildProfileSection(screenWidth),
-            // Divisor entre secciones.
-            Divider(
-              color: Color.fromARGB(255, 240, 238, 238),
-              thickness: 2.0,
-              height: 0.0,
-            ),
-            // Sección de publicaciones del usuario.
-            _buildGridView(userPublications),
-          ],
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Text(
+                        "Seguidos",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontFamily: 'Roboto',
+                        ),
+                      ),
+                      Text(
+                        seguidos.toString(),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontFamily: 'Roboto',
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+              // Divisores entre secciones.
+              Divider(
+                color: Color.fromARGB(255, 240, 238, 238),
+                thickness: 2.0,
+                height: 0.0,
+              ),
+              // Sección de perfil, incluyendo nombre y descripción.
+              _buildProfileSection(screenWidth),
+              // Divisor entre secciones.
+              Divider(
+                color: Color.fromARGB(255, 240, 238, 238),
+                thickness: 2.0,
+                height: 0.0,
+              ),
+              // Sección de publicaciones del usuario.
+              _buildGridView(userPublications),
+            ],
+          ),
         ),
       ),
     );
@@ -197,15 +225,15 @@ class _ProfilePageState extends State<ProfilePage> {
                   ],
                 ),
               )
-            : savedName.isNotEmpty || savedDescription.isNotEmpty
+            : nombre_perfil.isNotEmpty || descripcion.isNotEmpty
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildListTile("Nombre", savedName),
-                      _buildListTile("Descripción", savedDescription),
+                      _buildListTile("Nombre", nombre_perfil),
+                      _buildListTile("Descripción", descripcion),
                     ],
                   )
-                : Container(),
+                : Container(), // Si no hay datos guardados, muestra un contenedor vacío.
       ],
     );
   }
@@ -369,13 +397,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: () {
-                        savedName = nameController.text;
-                        savedDescription = descriptionController.text;
+                      onPressed: () async {
+                        // Realizar la actualización en la base de datos
+                        await updateProfile();
+                        // Cerrar el diálogo
                         Navigator.pop(context);
-                        setState(() {
-                          isEditing = false;
-                        });
                       },
                       style: ElevatedButton.styleFrom(
                         primary: const Color.fromARGB(255, 255, 255, 255),
@@ -398,5 +424,25 @@ class _ProfilePageState extends State<ProfilePage> {
         );
       },
     );
+  }
+
+  // Actualiza los datos del perfil en la base de datos
+  Future<void> updateProfile() async {
+    // Obtener los datos ingresados
+    String newName = nameController.text;
+    String newDescription = descriptionController.text;
+    // Realizar la actualización en la base de datos
+    final response = await supabase
+        .from('usuarios')
+        .update({'nombre_perfil': newName, 'descripcion': newDescription}).eq(
+            "id_usuarios", widget.user_id);
+
+    if (response.error == null) {
+      // Actualizar los datos locales si la operación fue exitosa
+      setState(() {
+        nombre_perfil = newName;
+        descripcion = newDescription;
+      });
+    }
   }
 }

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mog_flutter/pages/Principal.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// Inicialización de SupabaseClient con la URL y la clave de la API.
 final supabase = SupabaseClient('https://ngejlljkgxzpnwznpddk.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5nZWpsbGprZ3h6cG53em5wZGRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTY0MDY1NjMsImV4cCI6MjAxMTk4MjU2M30.nlZnIiHCjiThvu-cLj_aBPYaGE1knPFWXOhCkJQDLL4');
 
@@ -19,7 +17,11 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
   int publicationCount = 0;
   int segidores = 0;
   int seguidos = 0;
+  String image_data = "";
   String nombre = "";
+  String nombre_perfil = "";
+  String descripcion = "";
+
   bool isEditing = false;
   TextEditingController nameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
@@ -36,6 +38,7 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
   void initState() {
     super.initState();
     getUser(widget.user_id);
+    getBio(widget.user_id);
   }
 
   Future<void> getUser(int id_usuario) async {
@@ -46,6 +49,27 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
       segidores = data[0]["seguidores"];
       seguidos = data[0]["seguidos"];
       nombre = data[0]["nombre"];
+    });
+  }
+
+  Future<void> getBio(int id_usuario) async {
+    final data =
+        await supabase.from('usuarios').select().eq("id_usuarios", id_usuario);
+
+    setState(() {
+      nombre_perfil = data[0]["nombre_perfil"] ?? ""; // Manejo de valor nulo
+      descripcion = data[0]["descripcion"] ?? ""; // Manejo de valor nulo
+    });
+  }
+
+  Future<void> getPublicaciones(String id_publicaciones) async {
+    final data = await supabase
+        .from('publicaciones')
+        .select()
+        .eq("id_publicaciones", id_publicaciones);
+
+    setState(() {
+      image_data = data[0]["image_data"];
     });
   }
 
@@ -65,7 +89,6 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
             ),
             child: Column(
               children: <Widget>[
-                // Sección de la imagen del perfil.
                 Stack(
                   children: [
                     Icon(
@@ -86,8 +109,6 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
                     ),
                   ],
                 ),
-
-                // Sección del nombre del usuario.
                 Text(
                   nombre,
                   style: TextStyle(
@@ -96,7 +117,6 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                // Sección de estadísticas como seguidores y seguidos.
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
@@ -142,21 +162,17 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
                     )
                   ],
                 ),
-                // Divisores entre secciones.
                 Divider(
                   color: Color.fromARGB(255, 240, 238, 238),
                   thickness: 2.0,
                   height: 0.0,
                 ),
-                // Sección de perfil, incluyendo nombre y descripción.
                 _buildProfileSection(screenWidth),
-                // Divisor entre secciones.
                 Divider(
                   color: Color.fromARGB(255, 240, 238, 238),
                   thickness: 2.0,
                   height: 0.0,
                 ),
-                // Sección de publicaciones del usuario.
                 _buildGridView(userPublications),
               ],
             ),
@@ -204,12 +220,12 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
                   ],
                 ),
               )
-            : savedName.isNotEmpty || savedDescription.isNotEmpty
+            : nombre_perfil.isNotEmpty || descripcion.isNotEmpty
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildListTile("Nombre", savedName),
-                      _buildListTile("Descripción", savedDescription),
+                      _buildListTile("Nombre", nombre_perfil),
+                      _buildListTile("Descripción", descripcion),
                     ],
                   )
                 : Container(),
