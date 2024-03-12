@@ -88,6 +88,7 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Container(
           padding: EdgeInsets.all(20),
           width: screenWidth,
+          height: MediaQuery.of(context).size.height,
           decoration: BoxDecoration(
             color: Color.fromARGB(255, 22, 29, 77),
           ),
