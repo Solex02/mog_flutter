@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:convert';
 
 // Inicialización de SupabaseClient con la URL y la clave de la API.
 final supabase = SupabaseClient('https://ngejlljkgxzpnwznpddk.supabase.co',
@@ -23,27 +24,23 @@ class _ProfilePageState extends State<ProfilePage> {
   String nombre = "";
   String nombre_perfil = "";
   String descripcion = "";
-
   bool isEditing = false;
   TextEditingController nameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   String savedName = "";
   String savedDescription = "";
-  List<String> userPublications = [
-    'assets/images/ferrari.png',
-    'assets/images/honda.png',
-    'assets/images/koenigsegg.png',
-    'assets/images/regera.png',
-  ];
+  List<String> userPublications = [];
+
 
   @override
   void initState() {
     super.initState();
     getUser(widget.user_id);
     getBio(widget.user_id);
+    _loadUserPublications(widget.user_id);  
   }
 
-  Future<void> getUser(int id_usuario) async {
+ Future<void> getUser(int id_usuario) async {
     final data =
         await supabase.from('usuarios').select().eq("id_usuarios", id_usuario);
 
@@ -64,17 +61,23 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-  Future<void> getPublicaciones(String id_publicaciones) async {
-    final data = await supabase
+  Future<void> _loadUserPublications(int userId) async {
+    final response = await supabase
         .from('publicaciones')
         .select()
-        .eq("id_publicaciones", id_publicaciones);
+        .eq("id_usuario", userId);
+        
 
-    setState(() {
-      image_data = data[0]["image_data"];
-    });
+    
+      final List<Map<String, dynamic>> publications =
+          (response as List).cast<Map<String, dynamic>>();
+      setState(() {
+        userPublications = publications
+            .map<String>((publication) => publication['image_data'] as String)
+            .toList();
+      });
+    
   }
-
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -295,50 +298,51 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   // Construcción de la cuadrícula de publicaciones del usuario.
-  Widget _buildGridView(List<String> userPublications) {
-    return userPublications.isEmpty
-        ? Center(
-            child: Container(
-              margin: EdgeInsets.only(top: 100),
-              child: Text(
-                "Aun no hay publicaciones :(",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+Widget _buildGridView(List<String> userPublications) {
+  return userPublications.isEmpty
+      ? Center(
+          child: Container(
+            margin: EdgeInsets.only(top: 100),
+            child: Text(
+              "Aun no hay publicaciones :(",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
               ),
             ),
-          )
-        : SizedBox(
-            height: 500, // PUBLICACIONES GRINDVIEW //
-            child: GridView.builder(
-              primary: false,
-              padding: const EdgeInsets.all(20),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
-              itemCount: userPublications.length,
-              itemBuilder: (context, index) {
-                publicationCount++;
-                return Container(
-                  child: InkWell(
-                    onTap: () {},
-                    splashColor: Colors.brown.withOpacity(0.5),
-                    child: Image.network(
-                      userPublications[index],
-                      height: 80,
-                      width: 80,
-                      fit: BoxFit.cover,
-                    ),
+          ),
+        )
+      : SizedBox(
+          height: 500, // PUBLICACIONES GRINDVIEW //
+          child: GridView.builder(
+            primary: false,
+            padding: const EdgeInsets.all(20),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+            ),
+            itemCount: userPublications.length,
+            itemBuilder: (context, index) {
+              publicationCount++;
+              return Container(
+                child: InkWell(
+                  onTap: () {},
+                  splashColor: Colors.brown.withOpacity(0.5),
+                  child: Image.memory(
+                    base64.decode(userPublications[index]),
+                    height: 80,
+                    width: 80,
+                    fit: BoxFit.cover,
                   ),
-                );
-              },
-            ),
-          );
-  }
+                ),
+              );
+            },
+          ),
+        );
+}
+
 
   // Muestra el diálogo de edición del perfil.
   void _showEditProfileDialog() {
