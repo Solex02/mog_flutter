@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:mog_flutter/pages/otherprofile.dart';
 import 'upload_content.dart'; // Importa el nuevo archivo
 import 'package:supabase/supabase.dart';
 import 'package:uuid/uuid.dart';
@@ -21,7 +22,6 @@ class MainActivity extends StatefulWidget {
 class _MainActivityState extends State<MainActivity> {
   int _currentIndex = 0;
   List<Widget> _publications = [];
-  
 
   @override
   void initState() {
@@ -35,7 +35,7 @@ class _MainActivityState extends State<MainActivity> {
 
     final response = await supabase
         .from('publicaciones')
-        .insert({'image_data': imageData, 'description': description});
+        .insert({'image_data': imageData, "id_usuario": 1, 'description': description, "likes": 0});
 
     _loadPublications(); // Recargar las publicaciones después de insertar
     setState(() {
@@ -213,7 +213,8 @@ class ImageItem extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ProfilePage(user_id: Textid),
+                            builder: (context) =>
+                                OtherProfilePage(user_id: Textid),
                           ),
                         );
                       },
@@ -274,7 +275,8 @@ class ImageItem extends StatelessWidget {
 class LikeButton extends StatefulWidget {
   final int initialLikeCount;
 
-  const LikeButton({Key? key, required this.initialLikeCount}) : super(key: key);
+  const LikeButton({Key? key, required this.initialLikeCount})
+      : super(key: key);
 
   @override
   _LikeButtonState createState() => _LikeButtonState();
@@ -319,7 +321,8 @@ class _LikeButtonState extends State<LikeButton> {
           ),
         ),
         SizedBox(width: 0), // Espacio entre el icono y el campo de texto
-        Text('${likeCount}', style: TextStyle(fontSize: 16, color: Colors.white)),
+        Text('${likeCount}',
+            style: TextStyle(fontSize: 16, color: Colors.white)),
       ],
     );
   }
