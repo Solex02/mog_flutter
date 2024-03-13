@@ -53,34 +53,48 @@ class _MainActivityState extends State<MainActivity> {
     });
   }
 
-  void _loadPublications() async {
-    final response = await supabase.from('publicaciones').select();
+void _loadPublications() async {
+  final response = await supabase.from('publicaciones').select();
 
-    if (response != null) {
-      List<Map<String, dynamic>> publications =
-          (response).cast<Map<String, dynamic>>();
+  if (response != null) {
+    List<Map<String, dynamic>> publications =
+        (response).cast<Map<String, dynamic>>();
 
-      setState(() {
-        _publications = publications.map((publication) {
-          String imageData = publication['image_data'];
-          String description = publication['description'];
-          int likes = publication['likes'];
-          int user_id = publication['id_usuario'];
+    setState(() {
+      _publications = publications.map((publication) {
+        String imageData = publication['image_data'];
+        String description = publication['description'];
+        int likes = publication['likes'];
+        int user_id = publication['id_usuario'];
+        int publication_id = publication['id_publicaciones']; // Utilizamos 'id_publicaciones' como el campo que contiene el ID de la publicación
 
-          return ImageItem(
-            imageData: imageData,
-            description: description,
-            likes: likes,
-            logoImagePath: 'assets/images/1.png',
-            Textid: user_id,
-          );
-        }).toList();
+        return ImageItem(
+          imageData: imageData,
+          description: description,
+          likes: likes,
+          logoImagePath: 'assets/images/1.png',
+          Textid: user_id,
+          publicationId: publication_id, // Agregamos el ID de la publicación al constructor de ImageItem
+        );
+      }).toList();
+
+      // Imprimir los IDs antes de ordenar
+      _publications.forEach((publication) {
+        
       });
-    } else {
-      print('Error fetching publications');
-    }
-  }
 
+      // Ordenar la lista de publicaciones por ID de manera descendente
+      _publications.sort((a, b) => (b as ImageItem).publicationId.compareTo((a as ImageItem).publicationId));
+      
+      // Imprimir los IDs después de ordenar
+      _publications.forEach((publication) {
+        
+      });
+    });
+  } else {
+    print('Error fetching publications');
+  }
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -176,6 +190,7 @@ class ImageItem extends StatelessWidget {
   final int likes;
   final String logoImagePath;
   final int Textid;
+  final int publicationId; // Agregamos el parámetro para el ID de publicación
 
   ImageItem({
     required this.imageData, // Cambiado de File a String
@@ -183,6 +198,7 @@ class ImageItem extends StatelessWidget {
     required this.likes,
     required this.logoImagePath,
     required this.Textid,
+    required this.publicationId,
   });
 
   @override
