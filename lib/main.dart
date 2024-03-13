@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mog_flutter/pages/Principal.dart';
 import 'package:mog_flutter/pages/login.dart';
+import 'package:mog_flutter/pages/otherprofile.dart';
 import 'package:mog_flutter/pages/profile.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -23,7 +25,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const LoginPage(),
+      home: MainActivity(user_id: 14),
     );
   }
 }

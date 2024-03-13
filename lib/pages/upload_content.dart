@@ -44,19 +44,16 @@ class _UploadContentState extends State<UploadContent> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Subir Foto', style: TextStyle(color: Colors.white)),
+        title: Text('Subir Publicacion', style: TextStyle(color: Colors.white)),
         backgroundColor: Color.fromARGB(255, 37, 45, 95),
         centerTitle: true,
       ),
-      backgroundColor: Color.fromARGB(255, 54, 62, 116),
+      backgroundColor: Color.fromARGB(255, 22, 29, 77),
       body: Center(
-  
         child: Container(
-          
           width: MediaQuery.of(context).size.width * 0.8,
           padding: EdgeInsets.all(16.0),
           decoration: BoxDecoration(
-            
             color: Color.fromARGB(255, 37, 45, 95),
             borderRadius: BorderRadius.circular(16.0),
           ),
@@ -72,10 +69,12 @@ class _UploadContentState extends State<UploadContent> {
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                   ),
-                  icon: Icon(Icons.image, color: const Color.fromARGB(255, 37, 45, 95)),
+                  icon: Icon(Icons.image,
+                      color: const Color.fromARGB(255, 37, 45, 95)),
                   label: Text(
                     'Seleccionar Imagen',
-                    style: TextStyle(color: const Color.fromARGB(255, 37, 45, 95)),
+                    style:
+                        TextStyle(color: const Color.fromARGB(255, 37, 45, 95)),
                   ),
                 ),
                 SizedBox(height: 20),
@@ -113,7 +112,8 @@ class _UploadContentState extends State<UploadContent> {
                   ),
                   child: Text(
                     'Subir',
-                    style: TextStyle(color: const Color.fromARGB(255, 37, 45, 95)),
+                    style:
+                        TextStyle(color: const Color.fromARGB(255, 37, 45, 95)),
                   ),
                 ),
               ],

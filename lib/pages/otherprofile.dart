@@ -28,12 +28,7 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
   TextEditingController descriptionController = TextEditingController();
   String savedName = "";
   String savedDescription = "";
-  List<String> userPublications = [
-    'assets/images/ferrari.png',
-    'assets/images/honda.png',
-    'assets/images/koenigsegg.png',
-    'assets/images/regera.png',
-  ];
+  List<String> userPublications = [];
 
   @override
   void initState() {
@@ -107,10 +102,13 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
               children: <Widget>[
                 Stack(
                   children: [
-                    Icon(
-                      Icons.account_circle,
-                      size: 120,
-                      color: Colors.white,
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: new BoxDecoration(
+                          color: Color.fromARGB(221, 255, 0, 85),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.black, width: 10)),
                     ),
                     Positioned(
                       bottom: 0,

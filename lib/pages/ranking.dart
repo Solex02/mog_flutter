@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:mog_flutter/others/rankingController.dart';
+import 'package:mog_flutter/pages/otherprofile.dart';
 import 'package:mog_flutter/pages/profile.dart';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -80,7 +81,7 @@ class _RankingPageState extends State<RankingPage> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    ProfilePage(user_id: userid2),
+                                    OtherProfilePage(user_id: userid2),
                               ),
                             );
                           }, // Handle your callback.
@@ -101,7 +102,7 @@ class _RankingPageState extends State<RankingPage> {
                         height: 200,
                         child: DecoratedBox(
                           decoration: BoxDecoration(
-                              color: Color.fromARGB(255, 52, 65, 151)),
+                              color: Color.fromARGB(255, 37, 45, 95)),
                           child: Center(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -160,7 +161,7 @@ class _RankingPageState extends State<RankingPage> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    ProfilePage(user_id: userid1),
+                                    OtherProfilePage(user_id: userid1),
                               ),
                             );
                           }, // Handle your callback.
@@ -181,7 +182,7 @@ class _RankingPageState extends State<RankingPage> {
                         height: 250,
                         child: DecoratedBox(
                           decoration: BoxDecoration(
-                              color: Color.fromARGB(255, 52, 65, 151)),
+                              color: Color.fromARGB(255, 37, 45, 95)),
                           child: Center(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -240,7 +241,7 @@ class _RankingPageState extends State<RankingPage> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    ProfilePage(user_id: userid3),
+                                    OtherProfilePage(user_id: userid3),
                               ),
                             );
                           }, // Handle your callback.
@@ -261,7 +262,7 @@ class _RankingPageState extends State<RankingPage> {
                         height: 150,
                         child: DecoratedBox(
                           decoration: BoxDecoration(
-                              color: Color.fromARGB(255, 52, 65, 151)),
+                              color: Color.fromARGB(255, 37, 45, 95)),
                           child: Center(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -311,9 +312,6 @@ class _RankingPageState extends State<RankingPage> {
                   ),
                 ),
               ],
-            ),
-            SizedBox(
-              height: 50,
             ),
           ],
         ),

@@ -31,16 +31,15 @@ class _ProfilePageState extends State<ProfilePage> {
   String savedDescription = "";
   List<String> userPublications = [];
 
-
   @override
   void initState() {
     super.initState();
     getUser(widget.user_id);
     getBio(widget.user_id);
-    _loadUserPublications(widget.user_id);  
+    _loadUserPublications(widget.user_id);
   }
 
- Future<void> getUser(int id_usuario) async {
+  Future<void> getUser(int id_usuario) async {
     final data =
         await supabase.from('usuarios').select().eq("id_usuarios", id_usuario);
 
@@ -62,22 +61,18 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _loadUserPublications(int userId) async {
-    final response = await supabase
-        .from('publicaciones')
-        .select()
-        .eq("id_usuario", userId);
-        
+    final response =
+        await supabase.from('publicaciones').select().eq("id_usuario", userId);
 
-    
-      final List<Map<String, dynamic>> publications =
-          (response as List).cast<Map<String, dynamic>>();
-      setState(() {
-        userPublications = publications
-            .map<String>((publication) => publication['image_data'] as String)
-            .toList();
-      });
-    
+    final List<Map<String, dynamic>> publications =
+        (response as List).cast<Map<String, dynamic>>();
+    setState(() {
+      userPublications = publications
+          .map<String>((publication) => publication['image_data'] as String)
+          .toList();
+    });
   }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -98,10 +93,13 @@ class _ProfilePageState extends State<ProfilePage> {
               // Muestra la imagen y un botón para editar la imagen del perfil.
               Stack(
                 children: [
-                  Icon(
-                    Icons.account_circle,
-                    size: 120,
-                    color: Colors.white,
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: new BoxDecoration(
+                        color: Color.fromARGB(221, 255, 0, 85),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.black, width: 10)),
                   ),
                   Positioned(
                     bottom: 0,
@@ -299,51 +297,50 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   // Construcción de la cuadrícula de publicaciones del usuario.
-Widget _buildGridView(List<String> userPublications) {
-  return userPublications.isEmpty
-      ? Center(
-          child: Container(
-            margin: EdgeInsets.only(top: 100),
-            child: Text(
-              "Aun no hay publicaciones :(",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+  Widget _buildGridView(List<String> userPublications) {
+    return userPublications.isEmpty
+        ? Center(
+            child: Container(
+              margin: EdgeInsets.only(top: 100),
+              child: Text(
+                "Aun no hay publicaciones :(",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-        )
-      : SizedBox(
-          height: 500, // PUBLICACIONES GRINDVIEW //
-          child: GridView.builder(
-            primary: false,
-            padding: const EdgeInsets.all(20),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-            itemCount: userPublications.length,
-            itemBuilder: (context, index) {
-              publicationCount++;
-              return Container(
-                child: InkWell(
-                  onTap: () {},
-                  splashColor: Colors.brown.withOpacity(0.5),
-                  child: Image.memory(
-                    base64.decode(userPublications[index]),
-                    height: 80,
-                    width: 80,
-                    fit: BoxFit.cover,
+          )
+        : SizedBox(
+            height: 500, // PUBLICACIONES GRINDVIEW //
+            child: GridView.builder(
+              primary: false,
+              padding: const EdgeInsets.all(20),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+              ),
+              itemCount: userPublications.length,
+              itemBuilder: (context, index) {
+                publicationCount++;
+                return Container(
+                  child: InkWell(
+                    onTap: () {},
+                    splashColor: Colors.brown.withOpacity(0.5),
+                    child: Image.memory(
+                      base64.decode(userPublications[index]),
+                      height: 80,
+                      width: 80,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        );
-}
-
+                );
+              },
+            ),
+          );
+  }
 
   // Muestra el diálogo de edición del perfil.
   void _showEditProfileDialog() {

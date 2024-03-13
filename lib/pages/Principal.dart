@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:mog_flutter/others/color_palette.dart';
 import 'package:mog_flutter/pages/otherprofile.dart';
 import 'upload_content.dart'; // Importa el nuevo archivo
 import 'package:supabase/supabase.dart';
@@ -15,6 +16,10 @@ final supabase = SupabaseClient(
 );
 
 class MainActivity extends StatefulWidget {
+  const MainActivity({Key? key, required this.user_id}) : super(key: key);
+
+  final int user_id;
+
   @override
   _MainActivityState createState() => _MainActivityState();
 }
@@ -26,6 +31,8 @@ class _MainActivityState extends State<MainActivity> {
   @override
   void initState() {
     super.initState();
+
+    print(widget.user_id);
     _loadPublications();
   }
 
@@ -33,9 +40,12 @@ class _MainActivityState extends State<MainActivity> {
     List<int> bytes = await File(imagePath).readAsBytes();
     String imageData = base64Encode(bytes);
 
-    final response = await supabase
-        .from('publicaciones')
-        .insert({'image_data': imageData, "id_usuario": 1, 'description': description, "likes": 0});
+    final response = await supabase.from('publicaciones').insert({
+      'image_data': imageData,
+      "id_usuario": widget.user_id,
+      'description': description,
+      "likes": 0
+    });
 
     _loadPublications(); // Recargar las publicaciones después de insertar
     setState(() {
@@ -61,7 +71,7 @@ class _MainActivityState extends State<MainActivity> {
             imageData: imageData,
             description: description,
             likes: likes,
-            logoImagePath: 'assets/images/oscar.png',
+            logoImagePath: 'assets/images/1.png',
             Textid: user_id,
           );
         }).toList();
@@ -75,28 +85,19 @@ class _MainActivityState extends State<MainActivity> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 40,
-        backgroundColor: Colors.white,
+        toolbarHeight: 70,
+        backgroundColor: mcgpalette0.shade900,
         title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/images/iogo.png', width: 40, height: 40),
-            SizedBox(width: 8),
-            Text(
-              'Motorship Official Gallery',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'YourFontFamily',
-                color: Colors.black,
-              ),
-            ),
+            Image.asset('assets/images/mogo_logo.png', width: 80, height: 80),
           ],
         ),
       ),
       body: Stack(
         children: [
           Container(
-            color: Color.fromARGB(255, 37, 45, 95),
+            color: Color.fromARGB(255, 22, 29, 77),
             child: IndexedStack(
               index: _currentIndex,
               children: [
@@ -130,28 +131,28 @@ class _MainActivityState extends State<MainActivity> {
           if (_currentIndex ==
               3) // Muestra la pantalla de carga solo cuando se selecciona "Upload"
             Positioned.fill(
-              child: ProfilePage(user_id: 3),
+              child: ProfilePage(user_id: widget.user_id),
             ),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
+              icon: Icon(Icons.home),
+              label: 'Home',
+              backgroundColor: mcgpalette0.shade900),
           BottomNavigationBarItem(
-            icon: Icon(Icons.flag),
-            label: 'Top',
-          ),
+              icon: Icon(Icons.flag),
+              label: 'Top',
+              backgroundColor: mcgpalette0.shade900),
           BottomNavigationBarItem(
-            icon: Icon(Icons.camera_alt),
-            label: 'Upload',
-          ),
+              icon: Icon(Icons.camera_alt),
+              label: 'Upload',
+              backgroundColor: mcgpalette0.shade900),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+              icon: Icon(Icons.person),
+              label: 'Profile',
+              backgroundColor: mcgpalette0.shade900),
         ],
         onTap: (index) {
           setState(() {
@@ -159,8 +160,8 @@ class _MainActivityState extends State<MainActivity> {
           });
         },
         currentIndex: _currentIndex,
-        unselectedItemColor: Colors.black,
-        selectedItemColor: Colors.grey,
+        unselectedItemColor: Colors.grey,
+        selectedItemColor: Colors.white,
       ),
     );
   }
@@ -199,9 +200,15 @@ class ImageItem extends StatelessWidget {
             children: [
               // Logo a la izquierda de la publicación
               Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Image.asset(logoImagePath, width: 30, height: 30),
-              ),
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    width: 25,
+                    height: 25,
+                    decoration: new BoxDecoration(
+                        color: Color.fromARGB(221, 255, 0, 85),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.black, width: 3)),
+                  )),
               // Texto a la derecha del logo
               FutureBuilder<String>(
                 future: getName(Textid),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mog_flutter/others/color_palette.dart';
 import 'package:mog_flutter/pages/Principal.dart';
 import 'package:mog_flutter/pages/singup.dart';
 import 'package:mog_flutter/widgets/TextField.dart';
@@ -33,11 +34,16 @@ class _LoginPageState extends State<LoginPage> {
     if (emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
       if (await supa.userCheck(emailController.text, passwordController.text) ==
           true) {
+        int user_id =
+            await supa.getUserId(emailController.text, passwordController.text);
         print("entrar");
         Navigator.pop(context);
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MainActivity()),
+          MaterialPageRoute(
+              builder: (context) => MainActivity(
+                    user_id: user_id,
+                  )),
         );
 
         setState(() {
@@ -64,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Container(
-          color: Color.fromARGB(255, 22, 29, 77),
+          color: mcgpalette0.shade800,
           child: Column(
             children: [
               SizedBox(height: 200),
@@ -85,9 +91,8 @@ class _LoginPageState extends State<LoginPage> {
                     icon: Icon(Icons.email),
                   )),
               Container(
-                  padding:
-                      EdgeInsets.only(left: 40, right: 40, top: 10, bottom: 20),
-                  child: CustomTextField(
+                  padding: EdgeInsets.only(left: 40, right: 40, top: 10),
+                  child: CustomPasswordField(
                     controller: passwordController,
                     icon: Icon(Icons.lock),
                   )),
