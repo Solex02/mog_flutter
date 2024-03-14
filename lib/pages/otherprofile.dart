@@ -3,8 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final supabase = SupabaseClient(
-    'https://ngejlljkgxzpnwznpddk.supabase.co',
+final supabase = SupabaseClient('https://ngejlljkgxzpnwznpddk.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5nZWpsbGprZ3h6cG53em5wZGRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTY0MDY1NjMsImV4cCI6MjAxMTk4MjU2M30.nlZnIiHCjiThvu-cLj_aBPYaGE1knPFWXOhCkJQDLL4');
 
 class OtherProfilePage extends StatefulWidget {
@@ -23,8 +22,9 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
   String image_data = "";
   String nombre = "";
   String nombre_perfil = "";
+  String color_perfil = "";
   String descripcion = "";
-  bool isFollowing = false; 
+  bool isFollowing = false;
 
   bool isEditing = false;
   TextEditingController nameController = TextEditingController();
@@ -50,6 +50,7 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
       segidores = data[0]["seguidores"];
       seguidos = data[0]["seguidos"];
       nombre = data[0]["nombre"];
+      color_perfil = data[0]["color_perfil"];
     });
   }
 
@@ -58,8 +59,8 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
         await supabase.from('usuarios').select().eq("id_usuarios", id_usuario);
 
     setState(() {
-      nombre_perfil = data[0]["nombre_perfil"] ?? ""; 
-      descripcion = data[0]["descripcion"] ?? ""; 
+      nombre_perfil = data[0]["nombre_perfil"] ?? "";
+      descripcion = data[0]["descripcion"] ?? "";
     });
   }
 
@@ -100,15 +101,11 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
   Future<void> _toggleFollow() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (isFollowing) {
-      await supabase
-          .from('usuarios')
-          .update({'seguidores': segidores - 1})
-          .eq('id_usuarios', widget.user_id);
+      await supabase.from('usuarios').update({'seguidores': segidores - 1}).eq(
+          'id_usuarios', widget.user_id);
     } else {
-      await supabase
-          .from('usuarios')
-          .update({'seguidores': segidores + 1})
-          .eq('id_usuarios', widget.user_id);
+      await supabase.from('usuarios').update({'seguidores': segidores + 1}).eq(
+          'id_usuarios', widget.user_id);
     }
 
     setState(() {
@@ -147,7 +144,8 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
                       width: 75,
                       height: 75,
                       decoration: new BoxDecoration(
-                          color: Color.fromARGB(221, 255, 0, 85),
+                          color: Color(int.parse(color_perfil, radix: 16))
+                              .withOpacity(1.0),
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.black, width: 10)),
                     ),
@@ -212,15 +210,18 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
                         ],
                       ),
                     ),
-                    SizedBox(width: 20), // Espacio entre el botón y los otros elementos
+                    SizedBox(
+                        width:
+                            20), // Espacio entre el botón y los otros elementos
                     // Botón de seguir
                     ElevatedButton(
                       onPressed: () {
-                        _toggleFollow(); 
+                        _toggleFollow();
                       },
                       style: ElevatedButton.styleFrom(
-                        primary: isFollowing ? Colors.grey : Colors.blue, 
-                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        primary: isFollowing ? Colors.grey : Colors.blue,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
