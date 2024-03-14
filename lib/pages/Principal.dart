@@ -221,16 +221,33 @@ class ImageItem extends StatelessWidget {
           Row(
             children: [
               // Logo a la izquierda de la publicación
-              Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    width: 25,
-                    height: 25,
-                    decoration: new BoxDecoration(
-                        color: Color.fromARGB(221, 255, 0, 85),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.black, width: 3)),
-                  )),
+              FutureBuilder<Color>(
+  future: getUserProfileColor(Textid),
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return CircularProgressIndicator();
+    } else if (snapshot.hasError) {
+      return Text(
+        "Error",
+        style: TextStyle(color: Colors.white),
+      );
+    } else {
+      Color userProfileColor = snapshot.data!;
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          width: 25,
+          height: 25,
+          decoration: BoxDecoration(
+            color: userProfileColor, // Usar el color del perfil aquí
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.black, width: 3),
+          ),
+        ),
+      );
+    }
+  },
+),
               // Texto a la derecha del logo
               FutureBuilder<String>(
                 future: getName(Textid),
@@ -301,6 +318,23 @@ class ImageItem extends StatelessWidget {
         .eq("id_usuarios", user_id);
     return response[0]["nombre"];
   }
+Future<Color> getUserProfileColor(int userId) async {
+  final response = await supabase
+      .from('usuarios')
+      .select('color_perfil')
+      .eq('id_usuarios', userId)
+      .single();
+  // Obtener el color del perfil del usuario
+  String? userProfileColor = response['color_perfil'];
+  // Verificar si userProfileColor es nulo o vacío
+  if (userProfileColor == null || userProfileColor.isEmpty) {
+    return Colors.grey; // Devolver color predeterminado si no se encuentra ningún color
+  }
+  // Convertir el color de perfil de String a Color
+  Color color = Color(int.parse('FF$userProfileColor', radix: 16));
+
+  return color;
+}
 }
 
 class LikeButton extends StatefulWidget {
