@@ -30,6 +30,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String savedName = "";
   String savedDescription = "";
   List<String> userPublications = [];
+  Color? selectedColor;
 
   @override
   void initState() {
@@ -47,6 +48,7 @@ class _ProfilePageState extends State<ProfilePage> {
       segidores = data[0]["seguidores"];
       seguidos = data[0]["seguidos"];
       nombre = data[0]["nombre"];
+  
     });
   }
 
@@ -97,9 +99,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     width: 100,
                     height: 100,
                     decoration: new BoxDecoration(
-                        color: Color.fromARGB(221, 255, 0, 85),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.black, width: 10)),
+                      color: selectedColor ?? Color.fromARGB(221, 255, 0, 85),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.black, width: 10),
+                    ),
                   ),
                   Positioned(
                     bottom: 0,
@@ -325,10 +328,11 @@ class _ProfilePageState extends State<ProfilePage> {
               itemCount: userPublications.length,
               itemBuilder: (context, index) {
                 publicationCount++;
-                return Container(
-                  child: InkWell(
-                    onTap: () {},
-                    splashColor: Colors.brown.withOpacity(0.5),
+                return GestureDetector(
+                  onTap: () {
+                    _showPublicationDialog(context, userPublications[index]);
+                  },
+                  child: Container(
                     child: Image.memory(
                       base64.decode(userPublications[index]),
                       height: 80,
@@ -347,80 +351,155 @@ class _ProfilePageState extends State<ProfilePage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.black,
-          child: Container(
-            padding: EdgeInsets.all(10),
-            width: MediaQuery.of(context).size.width * 0.8,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Editar perfil",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Roboto',
-                  ),
-                ),
-                SizedBox(height: 10),
-                _buildTextField(
-                  controller: nameController,
-                  labelText: "Nombre",
-                  maxLength: 20,
-                ),
-                SizedBox(height: 10),
-                _buildTextField(
-                  controller: descriptionController,
-                  labelText: "Descripción",
-                  maxLength: 100,
-                ),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Dialog(
+              backgroundColor: Colors.black,
+              child: Container(
+                padding: EdgeInsets.all(10),
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      style: TextButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                      ),
-                      child: Text(
-                        "Cancelar",
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 0, 0, 0),
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Roboto',
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Editar perfil",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Roboto',
+                          ),
                         ),
-                      ),
+                        // Botón para abrir el menú de selección de colores
+                        IconButton(
+                          icon: Icon(Icons.color_lens, color: Colors.white),
+                          onPressed: () {
+                            _showColorPickerDialog(setState);
+                          },
+                        ),
+                      ],
                     ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        // Realizar la actualización en la base de datos
-                        await updateProfile();
-                        // Cerrar el diálogo
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        primary: const Color.fromARGB(255, 255, 255, 255),
-                      ),
-                      child: Text(
-                        "Guardar",
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 0, 0, 0),
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Roboto',
+                    SizedBox(height: 10),
+                    // Visualización del color seleccionado
+                    Row(
+                      children: [
+                        // Círculo de color seleccionado
+                        Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: selectedColor ?? Colors.transparent,
+                            shape: BoxShape.circle,
+                          ),
                         ),
-                      ),
+                        SizedBox(width: 10), // Espaciado entre el círculo y el icono del paleta de colores
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    _buildTextField(
+                      controller: nameController,
+                      labelText: "Nombre",
+                      maxLength: 20,
+                    ),
+                    SizedBox(height: 10),
+                    _buildTextField(
+                      controller: descriptionController,
+                      labelText: "Descripción",
+                      maxLength: 100,
+                    ),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          style: TextButton.styleFrom(
+                            backgroundColor: Color.fromARGB(255, 255, 255, 255),
+                          ),
+                          child: Text(
+                            "Cancelar",
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 0, 0, 0),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Roboto',
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () async {
+                            // Realizar la actualización en la base de datos
+                            await updateProfile();
+                            // Cerrar el diálogo
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            primary: const Color.fromARGB(255, 255, 255, 255),
+                          ),
+                          child: Text(
+                            "Guardar",
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 0, 0, 0),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Roboto',
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Método para mostrar el menú de selección de colores
+  void _showColorPickerDialog(Function(void Function()) setState) {
+    List<Color> colors = [
+      const Color.fromARGB(255, 92, 0, 31),
+      Color.fromARGB(221, 255, 0, 85),
+      Color.fromARGB(255, 2, 33, 99), // Azul oscuro
+      Colors.green,
+      Colors.amber, // Dorado
+    ];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.black,
+          title: Text("Selecciona un color", style: TextStyle(color: Colors.white)),
+          content: SingleChildScrollView(
+            child: Column(
+              children: colors.map((color) {
+                return ListTile(
+                  leading: Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      selectedColor = color;
+                    });
+                    Navigator.pop(context);
+                  },
+                );
+              }).toList(),
             ),
           ),
         );
@@ -436,15 +515,66 @@ class _ProfilePageState extends State<ProfilePage> {
     // Realizar la actualización en la base de datos
     final response = await supabase
         .from('usuarios')
-        .update({'nombre_perfil': newName, 'descripcion': newDescription}).eq(
-            "id_usuarios", widget.user_id);
+        .update({'nombre_perfil': newName, 'descripcion': newDescription, 'color_perfil': selectedColor?.value.toRadixString(16).substring(2)})
+        .eq("id_usuarios", widget.user_id);
 
-    if (response.error == null) {
-      // Actualizar los datos locales si la operación fue exitosa
-      setState(() {
-        nombre_perfil = newName;
-        descripcion = newDescription;
-      });
-    }
+    // Actualizar el estado con los nuevos datos
+    setState(() {
+      nombre_perfil = newName;
+      descripcion = newDescription;
+    });
+  }
+
+  void _showPublicationDialog(BuildContext context, String publicationImage) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Color.fromARGB(255, 26, 37, 96),
+          child: Container(
+            padding: EdgeInsets.all(10),
+            width: MediaQuery.of(context).size.width * 0.8,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  "Publicación",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Roboto',
+                  ),
+                ),
+                SizedBox(height: 10),
+                Image.memory(
+                  base64.decode(publicationImage),
+                  fit: BoxFit.contain,
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: const Color.fromARGB(255, 255, 255, 255),
+                  ),
+                  child: Text(
+                    "Cerrar",
+                    style: TextStyle(
+                      color: Color.fromARGB(255, 0, 0, 0),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Roboto',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }

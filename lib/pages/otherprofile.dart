@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
-final supabase = SupabaseClient('https://ngejlljkgxzpnwznpddk.supabase.co',
+final supabase = SupabaseClient(
+    'https://ngejlljkgxzpnwznpddk.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5nZWpsbGprZ3h6cG53em5wZGRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTY0MDY1NjMsImV4cCI6MjAxMTk4MjU2M30.nlZnIiHCjiThvu-cLj_aBPYaGE1knPFWXOhCkJQDLL4');
 
 class OtherProfilePage extends StatefulWidget {
@@ -22,6 +24,7 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
   String nombre = "";
   String nombre_perfil = "";
   String descripcion = "";
+  bool isFollowing = false; 
 
   bool isEditing = false;
   TextEditingController nameController = TextEditingController();
@@ -36,6 +39,7 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
     getUser(widget.user_id);
     getBio(widget.user_id);
     _loadUserPublications(widget.user_id);
+    _checkFollowStatus(); // Verificar el estado de seguimiento al iniciar la página
   }
 
   Future<void> getUser(int id_usuario) async {
@@ -54,8 +58,8 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
         await supabase.from('usuarios').select().eq("id_usuarios", id_usuario);
 
     setState(() {
-      nombre_perfil = data[0]["nombre_perfil"] ?? ""; // Manejo de valor nulo
-      descripcion = data[0]["descripcion"] ?? ""; // Manejo de valor nulo
+      nombre_perfil = data[0]["nombre_perfil"] ?? ""; 
+      descripcion = data[0]["descripcion"] ?? ""; 
     });
   }
 
@@ -83,6 +87,42 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
     });
   }
 
+  Future<void> _checkFollowStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? following = prefs.getBool('following_$widget.user_id');
+    if (following != null) {
+      setState(() {
+        isFollowing = following;
+      });
+    }
+  }
+
+  Future<void> _toggleFollow() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (isFollowing) {
+      await supabase
+          .from('usuarios')
+          .update({'seguidores': segidores - 1})
+          .eq('id_usuarios', widget.user_id);
+    } else {
+      await supabase
+          .from('usuarios')
+          .update({'seguidores': segidores + 1})
+          .eq('id_usuarios', widget.user_id);
+    }
+
+    setState(() {
+      isFollowing = !isFollowing;
+      if (isFollowing) {
+        segidores++;
+        prefs.setBool('following_$widget.user_id', true);
+      } else {
+        segidores--;
+        prefs.remove('following_$widget.user_id');
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -100,80 +140,95 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
             ),
             child: Column(
               children: <Widget>[
-                Stack(
+                Row(
                   children: [
+                    // Foto de perfil
                     Container(
-                      width: 100,
-                      height: 100,
+                      width: 75,
+                      height: 75,
                       decoration: new BoxDecoration(
                           color: Color.fromARGB(221, 255, 0, 85),
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.black, width: 10)),
                     ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.black,
-                        ),
-                        padding: EdgeInsets.all(1),
+                    SizedBox(width: 20), // Espacio entre la foto y el botón
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            nombre,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Column(
+                                children: [
+                                  Text(
+                                    "Seguidores",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontFamily: 'Roboto',
+                                    ),
+                                  ),
+                                  Text(
+                                    segidores.toString(),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontFamily: 'Roboto',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                children: [
+                                  Text(
+                                    "Seguidos",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontFamily: 'Roboto',
+                                    ),
+                                  ),
+                                  Text(
+                                    seguidos.toString(),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontFamily: 'Roboto',
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-                Text(
-                  nombre,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                    Column(
-                      children: [
-                        Text(
-                          "Seguidores",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontFamily: 'Roboto',
-                          ),
+                    SizedBox(width: 20), // Espacio entre el botón y los otros elementos
+                    // Botón de seguir
+                    ElevatedButton(
+                      onPressed: () {
+                        _toggleFollow(); 
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: isFollowing ? Colors.grey : Colors.blue, 
+                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        Text(
-                          segidores.toString(),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontFamily: 'Roboto',
-                          ),
-                        ),
-                      ],
+                      ),
+                      child: Text(
+                        isFollowing ? "Siguiendo" : "Seguir",
+                      ),
                     ),
-                    Column(
-                      children: [
-                        Text(
-                          "Seguidos",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontFamily: 'Roboto',
-                          ),
-                        ),
-                        Text(
-                          seguidos.toString(),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontFamily: 'Roboto',
-                          ),
-                        ),
-                      ],
-                    )
                   ],
                 ),
                 Divider(
@@ -192,8 +247,8 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
             ),
           ),
           Positioned(
-            top: 25,
-            left: 10,
+            top: 5,
+            left: 5,
             child: IconButton(
               icon: Icon(
                 Icons.arrow_back,
@@ -316,7 +371,9 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
                 publicationCount++;
                 return Container(
                   child: InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      _showPublicationDialog(context, userPublications[index]);
+                    },
                     splashColor: Colors.brown.withOpacity(0.5),
                     child: Image.memory(
                       base64.decode(userPublications[index]),
@@ -329,5 +386,67 @@ class _OtherProfilePageState extends State<OtherProfilePage> {
               },
             ),
           );
+  }
+
+  void _showPublicationDialog(BuildContext context, String publicationImage) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Color.fromARGB(255, 26, 37, 96),
+          child: Container(
+            padding: EdgeInsets.all(10),
+            width: MediaQuery.of(context).size.width * 0.8,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  "Publicación",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Roboto',
+                  ),
+                ),
+                SizedBox(height: 10),
+                // Ajuste: Verificar si la cadena de la imagen es válida antes de decodificarla
+                publicationImage.isNotEmpty
+                    ? Image.memory(
+                        base64.decode(publicationImage),
+                        fit: BoxFit.contain,
+                      )
+                    : Text(
+                        "Error al cargar la imagen",
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 16,
+                        ),
+                      ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: const Color.fromARGB(255, 255, 255, 255),
+                  ),
+                  child: Text(
+                    "Cerrar",
+                    style: TextStyle(
+                      color: Color.fromARGB(255, 0, 0, 0),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Roboto',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }
