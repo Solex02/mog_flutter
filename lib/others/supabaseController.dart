@@ -13,11 +13,14 @@ class supabaseController {
     //print("new user $user, $email, ${hashpass(password)}");
     await supabase.from('usuarios').insert({
       'nombre': user,
+      'nombre_perfil': user,
       'contraseña': hashpass(password),
       'email': email,
       'seguidores': 0,
       'seguidos': 0,
-      'marchas_totales': 0
+      'likes_totales': 0,
+      'descripcion': null,
+      'color_perfil': "ffc107"
     });
   }
 

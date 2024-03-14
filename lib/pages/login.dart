@@ -4,6 +4,7 @@ import 'package:mog_flutter/pages/Principal.dart';
 import 'package:mog_flutter/pages/singup.dart';
 import 'package:mog_flutter/widgets/TextField.dart';
 import 'package:mog_flutter/others/supabaseController.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -17,7 +18,6 @@ class _LoginPageState extends State<LoginPage> {
   // of the TextField.
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-
   String error = "";
 
   final supabaseController supa = supabaseController();
@@ -31,6 +31,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> loginApp() async {
+    // Obtain shared preferences.
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
     if (emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
       if (await supa.userCheck(emailController.text, passwordController.text) ==
           true) {
@@ -46,6 +49,9 @@ class _LoginPageState extends State<LoginPage> {
                   )),
         );
 
+        prefs.setString('email', emailController.text);
+        prefs.setString('password', passwordController.text);
+
         setState(() {
           error = "";
         });
@@ -55,6 +61,44 @@ class _LoginPageState extends State<LoginPage> {
         });
       }
     }
+  }
+
+  void autoLogin() async {
+    // Obtain shared preferences.
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if (prefs.getString('email') != null &&
+        prefs.getString('password') != null) {
+      String? email = prefs.getString('email');
+      String? password = prefs.getString('password');
+      if (email != null && password != null) {
+        if (await supa.userCheck(
+                emailController.text, passwordController.text) ==
+            true) {
+          int user_id = await supa.getUserId(
+              emailController.text, passwordController.text);
+          print("entrar");
+          Navigator.pop(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => MainActivity(
+                      user_id: user_id,
+                    )),
+          );
+        } else {
+          print("fallo auto login");
+        }
+      }
+    }
+    print("auto login vacio");
+  }
+
+  @override
+  @override
+  void initState() {
+    super.initState();
+    autoLogin();
   }
 
   @override

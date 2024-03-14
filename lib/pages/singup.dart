@@ -15,9 +15,8 @@ class SingUpPage extends StatefulWidget {
 }
 
 class _SingUpPageState extends State<SingUpPage> {
-  
   //Controladores para coger el interior de los text Fields
-  final emailController = TextEditingController(); 
+  final emailController = TextEditingController();
   final userNameController = TextEditingController();
   final passwordController = TextEditingController();
   final comfirmPasswordController = TextEditingController();
@@ -27,35 +26,30 @@ class _SingUpPageState extends State<SingUpPage> {
   //Iniciar el cliente de supabase
   final supabase = Supabase.instance.client;
 
-  
   //Linea de texto vacia para poder mostrarle errores al usuario
   String error = "";
-
 
   //Referencia del codigo de supabaseController y resendController
   final supabaseController supa = supabaseController();
   final resendController resend = resendController();
 
-
-  void confirmPassword(){
-    if(passwordController.text == comfirmPasswordController.text){
+  void confirmPassword() {
+    if (passwordController.text == comfirmPasswordController.text) {
       doesEmailExist();
-    }
-    else{
+    } else {
       setState(() {
-          error = "Passwords do not match";
-        });
+        error = "Passwords do not match";
+      });
     }
   }
-
 
   //Funcion que verifica si el email ya esta en uso, si existe da un error si no existe envia un email de verificacion y enseña un dialog
   Future<void> doesEmailExist() async {
     if (emailController.text.isNotEmpty &&
         passwordController.text.isNotEmpty &&
         userNameController.text.isNotEmpty) {
-      if (await supa.emailCheck(emailController.text) ==
-          false) { //si el email no existe
+      if (await supa.emailCheck(emailController.text) == false) {
+        //si el email no existe
         sendEmail(); //enviar email con codigo de verificacion
         buildDialog(); //enseñar alert dialog
       } else {
@@ -66,20 +60,19 @@ class _SingUpPageState extends State<SingUpPage> {
     }
   }
 
-void sendEmail() {
-  try{
- if (emailController.text.isNotEmpty &&
-      passwordController.text.isNotEmpty &&
-      userNameController.text.isNotEmpty) {
-    int verificationCode = resend.generateVerifyCode();
-    resend.postData(userNameController.text, emailController.text, verificationCode);
+  void sendEmail() {
+    try {
+      if (emailController.text.isNotEmpty &&
+          passwordController.text.isNotEmpty &&
+          userNameController.text.isNotEmpty) {
+        int verificationCode = resend.generateVerifyCode();
+        resend.postData(
+            userNameController.text, emailController.text, verificationCode);
+      }
+    } catch (e) {
+      error = e.toString();
+    }
   }
-  }
-  catch(e){
-    error = e.toString();
-  }
- 
-}
 
   //funcion pora construir el alert dialog
   void buildDialog() {
@@ -97,11 +90,10 @@ void sendEmail() {
           textFieldAlignment: MainAxisAlignment.spaceAround,
           fieldStyle: FieldStyle.underline,
           onCompleted: (pin) {
-            if(pin.length >= 5){
-               codeVerification(pin);
-            Navigator.of(context).pop();
+            if (pin.length >= 5) {
+              codeVerification(pin);
+              Navigator.of(context).pop();
             }
-           
           },
         ),
         actions: [
@@ -117,26 +109,25 @@ void sendEmail() {
     );
   }
 
-
   // funcion para verificar que el codigo que se le ha enviado al usuairio por email es correcto
   void codeVerification(String pin) {
-  print("Entered PIN: $pin");
-  int storedVerificationCode = resend.getVerifyCode();
+    print("Entered PIN: $pin");
+    int storedVerificationCode = resend.getVerifyCode();
 
-  if (pin != null && storedVerificationCode != null && pin.toString() == storedVerificationCode.toString()) {
-    print("Verification code correct");
-    supa.createAccount(userNameController.text, emailController.text, passwordController.text);
-  } else {
-    print("Verification code incorrect");
-    print(storedVerificationCode);
-    print(pin.toString());
+    if (pin != null &&
+        storedVerificationCode != null &&
+        pin.toString() == storedVerificationCode.toString()) {
+      print("Verification code correct");
+      supa.createAccount(userNameController.text, emailController.text,
+          passwordController.text);
+    } else {
+      print("Verification code incorrect");
+      print(storedVerificationCode);
+      print(pin.toString());
+    }
   }
-}
-
-
 
   //funcion para enviar email
-  
 
   //boton de back
   void back() {
@@ -147,8 +138,6 @@ void sendEmail() {
     );
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -157,65 +146,73 @@ void sendEmail() {
           color: Color.fromARGB(255, 22, 29, 77),
           child: Column(
             children: [
-      SizedBox(height: 200),
-      Container(
-        margin: EdgeInsets.only(right: 115, bottom: 30),
-        child: Text(
-          "Create Account",
-          style: TextStyle(
-              fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-      ),
-      Container(
-          padding: EdgeInsets.only(left: 40, right: 40),
-          child: CustomTextField(
-            controller: userNameController,
-            icon: Icon(Icons.person),
-          )),
-      Container(
-          padding: EdgeInsets.only(left: 40, right: 40, top: 10),
-          child: CustomTextField(
-            controller: emailController,
-            icon: Icon(Icons.email),
-          )),
-      Container(
-          padding: EdgeInsets.only(left: 40, right: 40, top: 10),
-          child: CustomPasswordField(
-            controller: passwordController,
-            icon: Icon(Icons.lock),
-          )),
-      Container(
-          padding: EdgeInsets.only(left: 40, right: 40, top: 10, bottom: 20),
-          child: CustomPasswordField(
-            controller: comfirmPasswordController,
-            icon: Icon(Icons.lock),
-          )),
-      Container(
-        padding: EdgeInsets.only(left: 40, right: 40, top: 10, bottom: 20),
-        child: Text(
-          error,
-          style: TextStyle(color: Colors.red),
-        ),
-      ),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ElevatedButton(onPressed: () {confirmPassword(); }, child: Text("Create account")),
-          SizedBox(
-            width: 20,
-          ),
-          TextButton(
-            onPressed: () {
-              back();
-            },
-            child: Text(
-              "Back",
-              style: TextStyle(color: Colors.white),
-            ),
-          )
-        ],
-      )
-    ],
+              SizedBox(height: 200),
+              Container(
+                margin: EdgeInsets.only(right: 115, bottom: 30),
+                child: Text(
+                  "Create Account",
+                  style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+              ),
+              Container(
+                  padding: EdgeInsets.only(left: 40, right: 40),
+                  child: CustomTextField(
+                    controller: userNameController,
+                    icon: Icon(Icons.person),
+                  )),
+              Container(
+                  padding: EdgeInsets.only(left: 40, right: 40, top: 10),
+                  child: CustomTextField(
+                    controller: emailController,
+                    icon: Icon(Icons.email),
+                  )),
+              Container(
+                  padding: EdgeInsets.only(left: 40, right: 40, top: 10),
+                  child: CustomPasswordField(
+                    controller: passwordController,
+                    icon: Icon(Icons.lock),
+                  )),
+              Container(
+                  padding:
+                      EdgeInsets.only(left: 40, right: 40, top: 10, bottom: 20),
+                  child: CustomPasswordField(
+                    controller: comfirmPasswordController,
+                    icon: Icon(Icons.lock),
+                  )),
+              Container(
+                padding:
+                    EdgeInsets.only(left: 40, right: 40, top: 10, bottom: 20),
+                child: Text(
+                  error,
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                      onPressed: () {
+                        confirmPassword();
+                      },
+                      child: Text("Create account")),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      back();
+                    },
+                    child: Text(
+                      "Back",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )
+                ],
+              )
+            ],
           )),
     );
   }
