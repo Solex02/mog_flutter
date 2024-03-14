@@ -24,6 +24,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String nombre = "";
   String nombre_perfil = "";
   String descripcion = "";
+  String color_perfil = "";
   bool isEditing = false;
   TextEditingController nameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
@@ -48,7 +49,7 @@ class _ProfilePageState extends State<ProfilePage> {
       segidores = data[0]["seguidores"];
       seguidos = data[0]["seguidos"];
       nombre = data[0]["nombre"];
-  
+      color_perfil = data[0]["color_perfil"];
     });
   }
 
@@ -98,8 +99,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   Container(
                     width: 100,
                     height: 100,
-                    decoration: new BoxDecoration(
-                      color: selectedColor ?? Color.fromARGB(221, 255, 0, 85),
+                    decoration: BoxDecoration(
+                      color: Color(int.parse(color_perfil, radix: 16))
+                          .withOpacity(1.0),
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.black, width: 10),
                     ),
@@ -126,6 +128,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ],
               ),
+
               // Sección del nombre del usuario.
               Text(
                 nombre,
@@ -396,7 +399,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             shape: BoxShape.circle,
                           ),
                         ),
-                        SizedBox(width: 10), // Espaciado entre el círculo y el icono del paleta de colores
+                        SizedBox(
+                            width:
+                                10), // Espaciado entre el círculo y el icono del paleta de colores
                       ],
                     ),
                     SizedBox(height: 10),
@@ -479,7 +484,8 @@ class _ProfilePageState extends State<ProfilePage> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.black,
-          title: Text("Selecciona un color", style: TextStyle(color: Colors.white)),
+          title: Text("Selecciona un color",
+              style: TextStyle(color: Colors.white)),
           content: SingleChildScrollView(
             child: Column(
               children: colors.map((color) {
@@ -513,10 +519,11 @@ class _ProfilePageState extends State<ProfilePage> {
     String newName = nameController.text;
     String newDescription = descriptionController.text;
     // Realizar la actualización en la base de datos
-    final response = await supabase
-        .from('usuarios')
-        .update({'nombre_perfil': newName, 'descripcion': newDescription, 'color_perfil': selectedColor?.value.toRadixString(16).substring(2)})
-        .eq("id_usuarios", widget.user_id);
+    final response = await supabase.from('usuarios').update({
+      'nombre_perfil': newName,
+      'descripcion': newDescription,
+      'color_perfil': selectedColor?.value.toRadixString(16).substring(2)
+    }).eq("id_usuarios", widget.user_id);
 
     // Actualizar el estado con los nuevos datos
     setState(() {
